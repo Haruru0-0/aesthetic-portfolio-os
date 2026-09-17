@@ -27,6 +27,7 @@ import awqafRashaya from "@/assets/AwqadRashaya.png"
 import nebula from "@/assets/Nebula.png"
 import notionCraft from "@/assets/NotionCraft-Ai.png"
 import portagen from "@/assets/Portagen.png"
+import steamGamesAnalysis from "@/assets/SteamGamesAnalysis.png"
 import Autoplay from "embla-carousel-autoplay"
 
 export default function Projects({ windowWidth }: { windowWidth?: number }) {
@@ -115,6 +116,15 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       tags: ["Next.js", "Supabase", "Google Drive integration", "Spotify integration"],
       demoUrl: "https://porta-gen.vercel.app/",
       githubUrl: "https://github.com/AhmadKanaan0/PortaGen",
+    },
+    {
+      id: 6,
+      title: "Steam Games Analysis",
+      description: "A data analysis of 139,580 Steam games ending in a model that predicts a game's audience before launch. Seven data-quality issues traced and fixed, an accuracy score proven worse than a constant, and a self-caught leakage bug — with an interactive dashboard exploring the findings.",
+      image: steamGamesAnalysis,
+      tags: ["Python", "Pandas", "Scikit-learn", "Streamlit"],
+      demoUrl: "https://steam-games-analysis-demo.streamlit.app/",
+      githubUrl: "https://github.com/AhmadKanaan0/steam-games-analysis",
     },
   ]
 
