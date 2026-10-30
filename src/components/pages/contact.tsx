@@ -64,7 +64,7 @@ export default function Contact({ windowWidth }: { windowWidth?: number }) {
   }
 
   const contactInfo = [
-    { icon: <Mail className="h-5 w-5" />,   title: "Email",    value: "ahmad.w.kanaan@gmail.com", link: "mailto:ahmad.w.kanaan@gmail.com" },
+    { icon: <Mail className="h-5 w-5" />,   title: "Email",    value: "ahmad.w.kanaan@proton.me", link: "mailto:ahmad.w.kanaan@proton.me" },
     { icon: <Phone className="h-5 w-5" />,  title: "Phone",    value: "+961 81 849 055",           link: "tel:+96181849055" },
     { icon: <MapPin className="h-5 w-5" />, title: "Location", value: "Beirut, Lebanon",           link: "https://maps.google.com/?q=Beirut,Lebanon" },
   ]

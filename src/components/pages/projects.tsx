@@ -97,7 +97,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       image: nebula,
       tags: ["React", "Node js", "Postgres"],
       demoUrl: "https://nebula-gamma-inky.vercel.app/",
-      githubUrl: "https://github.com/AhmadKanaan0/Nebula",
+      githubUrl: "https://github.com/Haruru0-0/Nebula",
     },
     {
       id: 4,
@@ -106,7 +106,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       image: notionCraft,
       tags: ["Next.js", "Supabase", "Vercel ai sdk"],
       demoUrl: "https://notioncraft-ai.vercel.app/",
-      githubUrl: "https://github.com/AhmadKanaan0/notioncraft-ai",
+      githubUrl: "https://github.com/Haruru0-0/notioncraft-ai",
     },
     {
       id: 5,
@@ -115,7 +115,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       image: portagen,
       tags: ["Next.js", "Supabase", "Google Drive integration", "Spotify integration"],
       demoUrl: "https://porta-gen.vercel.app/",
-      githubUrl: "https://github.com/AhmadKanaan0/PortaGen",
+      githubUrl: "https://github.com/Haruru0-0/PortaGen",
     },
     {
       id: 6,
@@ -124,7 +124,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       image: steamGamesAnalysis,
       tags: ["Python", "Pandas", "Scikit-learn", "Streamlit"],
       demoUrl: "https://steam-games-analysis-demo.streamlit.app/",
-      githubUrl: "https://github.com/AhmadKanaan0/steam-games-analysis",
+      githubUrl: "https://github.com/Haruru0-0/steam-games-analysis",
     },
   ]
 

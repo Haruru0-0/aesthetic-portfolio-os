@@ -33,8 +33,8 @@ const FILES: Record<string, string[]> = {
     'Open the Projects window for full details!',
   ],
   'contact.txt': [
-    'Email:    assaad.r.kenaan@gmail.com',
-    'GitHub:   github.com/AhmadKanaan0',
+    'Email:    ahmad.w.kanaan@proton.me',
+    'GitHub:   github.com/Haruru0-0',
     'LinkedIn: linkedin.com/in/ahmadkanaan',
     '',
     "Or just open the Contact window — it's right there! 👀",

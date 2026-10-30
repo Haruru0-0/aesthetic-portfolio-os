@@ -24,7 +24,7 @@ export default function Links() {
   }, { scope: containerRef, dependencies: [] })
 
   const socialLinks = [
-    { name: "GitHub",    url: "https://github.com/AhmadKanaan0",          icon: <Github    className="h-5 w-5" />, color: "bg-gray-900 hover:bg-gray-800"  },
+    { name: "GitHub",    url: "https://github.com/Haruru0-0",          icon: <Github    className="h-5 w-5" />, color: "bg-gray-900 hover:bg-gray-800"  },
     { name: "LinkedIn",  url: "https://linkedin.com/in/ahmad-kanaan",     icon: <Linkedin  className="h-5 w-5" />, color: "bg-blue-600 hover:bg-blue-700"  },
     { name: "Twitter",   url: "https://twitter.com/username",         icon: <Twitter   className="h-5 w-5" />, color: "bg-sky-500 hover:bg-sky-600"    },
     { name: "Instagram", url: "https://instagram.com/username",       icon: <Instagram className="h-5 w-5" />, color: "bg-pink-600 hover:bg-pink-700"  },
