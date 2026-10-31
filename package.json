@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
+    "fetch-blog": "node scripts/fetch-blog.mjs",
+    "prebuild": "node scripts/fetch-blog.mjs",
     "build": "vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run"

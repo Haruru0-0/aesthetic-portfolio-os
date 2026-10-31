@@ -1,4 +1,4 @@
-import { GraphQLClient, gql } from 'graphql-request'
+import { blogPosts } from '@/data/blog-posts'
 
 interface CoverImage {
   url: string
@@ -19,53 +19,8 @@ export interface PostNode {
   url: string
 }
 
-interface PostEdge {
-  node: PostNode
-}
-
-interface PostsConnection {
-  edges: PostEdge[]
-}
-
-interface Publication {
-  posts: PostsConnection
-}
-
-interface HashnodeResponse {
-  publication: Publication
-}
-
-const HASHNODE_API = 'https://gql.hashnode.com'
-const USERNAME = 'ahmadkanaan'
-
-const client = new GraphQLClient(HASHNODE_API)
-
+// Posts are downloaded from the Hashnode RSS feed at build time (scripts/fetch-blog.mjs).
+// Hashnode's GraphQL API now requires a paid plan, and the feed has no CORS headers for browsers.
 export async function fetchBlogPosts(): Promise<PostNode[]> {
-  const query = gql`
-    query {
-      publication(host: "${USERNAME}.hashnode.dev") {
-        posts(first: 10) {
-          edges {
-            node {
-              id
-              title
-              brief
-              publishedAt
-              readTimeInMinutes
-              coverImage {
-                url
-              }
-              tags {
-                name
-              }
-              url
-            }
-          }
-        }
-      }
-    }
-  `
-
-  const response = await client.request<HashnodeResponse>(query)
-  return response.publication.posts.edges.map(edge => edge.node)
+  return blogPosts
 }
