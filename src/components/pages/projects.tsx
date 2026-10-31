@@ -28,6 +28,7 @@ import nebula from "@/assets/Nebula.png"
 import notionCraft from "@/assets/NotionCraft-Ai.png"
 import portagen from "@/assets/Portagen.png"
 import steamGamesAnalysis from "@/assets/SteamGamesAnalysis.png"
+import malwareClassifier from "@/assets/MalwareClassifier.png"
 import Autoplay from "embla-carousel-autoplay"
 
 export default function Projects({ windowWidth }: { windowWidth?: number }) {
@@ -125,6 +126,15 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       tags: ["Python", "Pandas", "Scikit-learn", "Streamlit"],
       demoUrl: "https://steam-games-analysis-demo.streamlit.app/",
       githubUrl: "https://github.com/Haruru0-0/steam-games-analysis",
+    },
+    {
+      id: 7,
+      title: "Malware Classifier",
+      description: "A static Windows-malware classifier trained on EMBER2024 and tested on files newer than anything it saw in training. It catches 93.8% of malware at a 1% false-positive rate, shows the random split overstating that by 3 points, and explains each verdict with SHAP. The public demo is research only, not antivirus.",
+      image: malwareClassifier,
+      tags: ["Python", "LightGBM", "SHAP", "Streamlit"],
+      demoUrl: "https://malware-classifier-h.streamlit.app",
+      githubUrl: "https://github.com/Haruru0-0/malware-classifier",
     },
   ]
 
