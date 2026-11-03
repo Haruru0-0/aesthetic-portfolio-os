@@ -1,0 +1,10 @@
+# Gotchas
+
+See [[architecture]].
+
+- **`src/data/blog-posts.ts` is generated.** Do not edit it by hand; run `yarn fetch-blog`. The daily workflow commits it, so pull before pushing.
+- **`graphql-request` is no longer used** by the blog code but is still listed in `package.json`.
+- **The README is out of date:** it says React 18 in a badge and lists no terminal or achievements. Check `package.json` for versions.
+- **The routes file `routeTree.gen.ts` is generated** by TanStack Router.
+- **`node_modules` is not installed in this checkout,** so the site has not been built or looked at since the 2026-11-02 changes.
+- **`graphify.exe` is blocked on this machine;** use `python -m graphify update .`.

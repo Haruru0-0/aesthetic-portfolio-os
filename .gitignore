@@ -4,3 +4,5 @@ dist
 dist-ssr
 *.local
 .agents
+graphify-out
+.claude/.memory-state
