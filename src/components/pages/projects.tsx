@@ -97,7 +97,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       description: "Nebula is a modern AI Agent Platform designed for creating, managing, and interacting with specialized AI agents.",
       image: nebula,
       tags: ["React", "Node js", "Postgres"],
-      demoUrl: "https://nebula-gamma-inky.vercel.app/",
+      demoUrl: "https://nebula-ai0.vercel.app/",
       githubUrl: "https://github.com/Haruru0-0/Nebula",
     },
     {
@@ -106,7 +106,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       description: "NotionCraft AI: A Next.js web app mimicking Notion's rich text editor with AI-powered chat and writing features.",
       image: notionCraft,
       tags: ["Next.js", "Supabase", "Vercel ai sdk"],
-      demoUrl: "https://notioncraft-ai.vercel.app/",
+      demoUrl: "https://notioncraft-ai-silk.vercel.app/",
       githubUrl: "https://github.com/Haruru0-0/notioncraft-ai",
     },
     {
