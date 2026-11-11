@@ -22,13 +22,13 @@ import { Github, ExternalLink } from "lucide-react"
 import { ScrollContainerContext } from "@/components/animated-section"
 import { animateTextReveal, animateBlurText } from "@/lib/animations"
 import AnimatedContent from "@/components/AnimatedContent"
-import facilify from "@/assets/Facilify.png"
-import awqafRashaya from "@/assets/AwqadRashaya.png"
-import nebula from "@/assets/Nebula.png"
-import notionCraft from "@/assets/NotionCraft-Ai.png"
-import portagen from "@/assets/Portagen.png"
-import steamGamesAnalysis from "@/assets/SteamGamesAnalysis.png"
-import malwareClassifier from "@/assets/MalwareClassifier.png"
+import facilify from "@/assets/Facilify.webp"
+import awqafRashaya from "@/assets/AwqadRashaya.webp"
+import nebula from "@/assets/Nebula.webp"
+import notionCraft from "@/assets/NotionCraft-Ai.webp"
+import portagen from "@/assets/Portagen.webp"
+import steamGamesAnalysis from "@/assets/SteamGamesAnalysis.webp"
+import malwareClassifier from "@/assets/MalwareClassifier.webp"
 import Autoplay from "embla-carousel-autoplay"
 
 export default function Projects({ windowWidth }: { windowWidth?: number }) {
@@ -115,7 +115,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       description: "PortaGen is a web-based portfolio generator that allows users to create customizable desktop environments, lock screens, and interactive windows for showcasing projects and content.",
       image: portagen,
       tags: ["Next.js", "Supabase", "Google Drive integration", "Spotify integration"],
-      demoUrl: "https://porta-gen.vercel.app/",
+      demoUrl: "https://porta-gen-eta.vercel.app/",
       githubUrl: "https://github.com/Haruru0-0/PortaGen",
     },
     {
