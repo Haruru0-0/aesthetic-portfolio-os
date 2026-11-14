@@ -165,33 +165,13 @@ code {
 }
 
 /* Custom utilities */
+.portfolio-section-title {
+  @apply mb-4 inline-block border-b-2 text-2xl font-bold;
+  border-color: var(--cute-text);
+}
+
 .backdrop-blur-xs {
   backdrop-filter: blur(2px);
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 0;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  box-shadow:
-    inset 2px 2px 0px #ffffff,
-    inset -2px -2px 0px var(--cute-border),
-    6px 6px 0px rgba(0, 0, 0, 0.3);
 }
 
 .window-drag-handle {
@@ -665,7 +645,7 @@ code {
   z-index: 1;
   position: absolute;
   inset: 0;
-  background: rgba(56, 189, 248, 0.50);
+  background: rgba(37, 120, 210, 0.42);
   border-radius: 2rem;
 }
 
@@ -674,8 +654,8 @@ code {
   inset: 0;
   z-index: 2;
   overflow: hidden;
-  box-shadow: inset 2px 2px 1px 0 rgba(224, 242, 254, 0.6),
-    inset -1px -1px 1px 1px rgba(224, 242, 254, 0.6);
+  box-shadow: inset 1px 1px 0.5px 0 rgba(224, 242, 254, 0.55),
+    inset -0.5px -0.5px 0.5px 0.5px rgba(224, 242, 254, 0.45);
   border-radius: 2rem;
 }
 
@@ -693,7 +673,8 @@ code {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
-.liquidGlass-wrapper:hover .dock {
+.liquidGlass-wrapper:hover .dock,
+.dock-glass:hover .dock {
   padding: 0.8rem;
 }
 
@@ -745,14 +726,24 @@ code {
 }
 
 .pixel-badge {
-  border-radius: 0 !important;
-  border: 2px solid var(--cute-text);
-  background: var(--cute-highlight);
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--cute-border) 60%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--cute-border) 26%, transparent),
+    color-mix(in srgb, var(--cute-border) 12%, transparent));
   color: var(--cute-text);
-  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
-  font-family: "Pixelify Sans", monospace;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 1px 3px rgba(0, 30, 80, 0.25);
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  padding-inline: 0.65rem;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.pixel-badge:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(56, 189, 248, 0.35);
 }
 
 /* Achievement card */
@@ -847,7 +838,8 @@ code {
   transition: padding 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
-.liquidGlass-wrapper:hover .mobile-settings-inner {
+.liquidGlass-wrapper:hover .mobile-settings-inner,
+.dock-glass:hover .mobile-settings-inner {
   padding: 1.25rem;
 }
 
@@ -967,4 +959,86 @@ code {
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+}
+
+/* Darker liquid glass for panels that carry light text (search, context menu) */
+.liquidGlass-wrapper.glass-panel {
+  display: block;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.liquidGlass-wrapper.glass-panel .liquidGlass-tint {
+  background: rgba(8, 47, 73, 0.72);
+}
+
+/* Fade the desktop wallpaper in when it changes */
+@keyframes wallpaper-in {
+  from { opacity: 0; }
+}
+
+.wallpaper-in {
+  animation: wallpaper-in 0.7s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallpaper-in { animation: none; }
+}
+
+/* Dock magnification: icon sizes are driven by springs in Taskbar.tsx */
+.dock.dock-magnify {
+  align-items: flex-end;
+  padding: 0.6rem 0.6rem 0.75rem;
+  transition: none;
+}
+
+.dock-glass:hover .dock.dock-magnify {
+  padding: 0.6rem 0.6rem 0.75rem;
+}
+
+.dock-magnify .dock-icon,
+.dock-magnify .dock-icon img {
+  transition: none;
+}
+
+.dock-magnify .dock-icon:hover {
+  transform: none;
+}
+
+/* Custom scrollbars: thin, rounded, glass-blue. Chromium and Safari use the webkit pseudo-elements;
+   Firefox (and Zen) use the standard properties. The standard properties are only applied where the
+   webkit ones are missing, because Chromium would otherwise ignore the custom thumb. */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(186, 230, 253, 0.7), rgba(56, 189, 248, 0.45));
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(224, 242, 254, 0.9), rgba(125, 211, 252, 0.65));
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    /* Firefox/Zen cannot round or gradient the thumb. "auto" is its full-width bar (the
+       thinnest it can be is "thin"), and the faint track makes the lane visible. */
+    scrollbar-width: auto;
+    scrollbar-color: rgba(125, 211, 252, 0.75) rgba(8, 30, 70, 0.35);
+  }
 }

@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { MagicCard } from "@/components/ui/magic-card"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -22,20 +23,21 @@ import { Github, ExternalLink } from "lucide-react"
 import { ScrollContainerContext } from "@/components/animated-section"
 import { animateTextReveal, animateBlurText } from "@/lib/animations"
 import AnimatedContent from "@/components/AnimatedContent"
-import facilify from "@/assets/Facilify.webp"
-import awqafRashaya from "@/assets/AwqadRashaya.webp"
-import nebula from "@/assets/Nebula.webp"
-import notionCraft from "@/assets/NotionCraft-Ai.webp"
-import portagen from "@/assets/Portagen.webp"
-import steamGamesAnalysis from "@/assets/SteamGamesAnalysis.webp"
-import malwareClassifier from "@/assets/MalwareClassifier.webp"
-import Autoplay from "embla-carousel-autoplay"
+import facilify from "@/assets/projects/Facilify.webp"
+import awqafRashaya from "@/assets/projects/AwqadRashaya.webp"
+import nebula from "@/assets/projects/Nebula.webp"
+import notionCraft from "@/assets/projects/NotionCraft-Ai.webp"
+import portagen from "@/assets/projects/Portagen.webp"
+import steamGamesAnalysis from "@/assets/projects/SteamGamesAnalysis.webp"
+import malwareClassifier from "@/assets/projects/MalwareClassifier.webp"
+import { createAutoplay } from "@/lib/autoplay"
 
 export default function Projects({ windowWidth }: { windowWidth?: number }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useContext(ScrollContainerContext)
   const [activeProject, setActiveProject] = useState(0)
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null)
+  const [autoplayPlugins] = useState(() => createAutoplay())
 
   const isNarrow = windowWidth !== undefined && windowWidth < 700
 
@@ -86,10 +88,8 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       image: awqafRashaya,
       tags: ["React", "Spring boot", "Postgres", "OpenAi"],
       demoUrl: "https://awqaf-qa.onrender.com",
-      githubUrl: {
-        frontend: "https://github.com/username/task-management-frontend",
-        backend: "https://github.com/username/task-management-backend",
-      },
+      // Client system: no public repository.
+      githubUrl: undefined as string | { frontend: string; backend: string } | undefined,
     },
     {
       id: 3,
@@ -138,6 +138,9 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
     },
   ]
 
+  // The carousel highlights the three most recent projects; the grid below lists all of them.
+  const featured = [projects[6], projects[5], projects[4]]
+
   return (
     <div ref={containerRef} className="space-y-8 max-w-5xl mx-auto pixel-text">
       <div className="text-center">
@@ -148,7 +151,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
       <AnimatedContent scale={0.82} ease="back.out(1.7)" className="relative">
         <Carousel
           setApi={setCarouselApi}
-          plugins={[Autoplay({ delay: 2000 })]}
+          plugins={autoplayPlugins}
           opts={{ align: "start", loop: true }}
         >
           <div className="flex items-center gap-2">
@@ -158,9 +161,9 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
               </div>
             )}
             <CarouselContent className="-ml-4 items-stretch flex-1">
-              {projects.map((project) => (
+              {featured.map((project) => (
                 <CarouselItem key={project.id} className="pl-4">
-                  <Card className="pixel-card border-0 shadow-lg overflow-hidden h-full flex flex-col">
+                  <Card className="pixel-card border-0 gap-3 py-4 shadow-lg overflow-hidden h-full flex flex-col">
                     <div
                       className="grid gap-2 px-4 flex-1"
                       style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 400px), 1fr))" }}
@@ -174,19 +177,19 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
                       </div>
                       <div className="p-6 flex flex-col">
                         <h2 className="text-2xl font-bold mb-2 pixel-title">{project.title}</h2>
-                        <p className="text-muted-foreground mb-4 opacity-80">{project.description}</p>
+                        <p className="mb-4 opacity-90">{project.description}</p>
                         <div className="flex flex-wrap gap-2 mb-6">
                           {project.tags.map((tag, index) => (
                             <Badge key={index} variant="secondary" className="pixel-badge hover:bg-[var(--cute-highlight)]">{tag}</Badge>
                           ))}
                         </div>
                         <div className="mt-auto flex flex-wrap gap-3">
-                          <Button asChild className="flex-grow sm:flex-grow-0 border-2 border-[var(--cute-text)] rounded-none bg-[var(--cute-text)] text-white hover:bg-[var(--cute-text)]/90">
+                          <Button asChild className="flex-grow sm:flex-grow-0 border-2 border-[var(--cute-text)] rounded-none bg-[var(--cute-text)] text-[var(--cute-on-text)] hover:bg-[var(--cute-text)]/90">
                             <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="mr-2 h-4 w-4" /> Live Demo
                             </a>
                           </Button>
-                          {typeof project.githubUrl === "string" ? (
+                          {!project.githubUrl ? null : typeof project.githubUrl === "string" ? (
                             <Button variant="outline" asChild className="flex-grow sm:flex-grow-0 border-2 border-[var(--cute-text)] rounded-none hover:bg-[var(--cute-highlight)] text-[var(--cute-text)]">
                               <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
                                 <Github className="mr-2 h-4 w-4" /> GitHub
@@ -230,20 +233,23 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
           )}
         </Carousel>
         <div className="flex justify-center mt-4 gap-2">
-          {projects.map((_, index) => (
+          {featured.map((project, index) => (
             <button
-              key={index}
-              className={`w-3 h-3 border border-[var(--cute-text)] ${index === activeProject ? "bg-[var(--cute-text)]" : "bg-transparent"}`}
+              key={project.id}
+              aria-label={`Show ${project.title}`}
+              aria-current={index === activeProject}
+              className={`cursor-pointer w-3 h-3 border border-[var(--cute-text)] ${index === activeProject ? "bg-[var(--cute-text)]" : "bg-transparent"}`}
               onClick={() => carouselApi?.scrollTo(index)}
             />
           ))}
         </div>
       </AnimatedContent>
 
-      <div className="grid gap-6 mt-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+      <h2 data-anim="text" className="text-2xl font-bold pixel-title border-b-2 border-[var(--cute-text)] inline-block mt-8">All projects</h2>
+      <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
         {projects.map((project, index) => (
           <AnimatedContent key={project.id} delay={index * 0.07} distance={18} scale={0.78} ease="back.out(1.7)">
-            <Card className="h-full flex flex-col hover:shadow-md transition-shadow border-0 pixel-card">
+            <MagicCard className="h-full rounded-none pb-4 transition-transform hover:-translate-y-0.5">
               <div className="aspect-video overflow-hidden border-b-2 border-[var(--cute-text)]">
                 <img
                   src={project.image || `/placeholder.svg?height=200&width=400`}
@@ -251,9 +257,9 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
                   className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
                 />
               </div>
-              <CardContent className="pt-6 flex-grow">
+              <CardContent className="flex-grow">
                 <h3 className="text-xl font-bold mb-2 pixel-title">{project.title}</h3>
-                <p className="text-sm opacity-70 mb-4 line-clamp-3">{project.description}</p>
+                <p className="text-sm opacity-85 mb-4 line-clamp-4">{project.description}</p>
                 <div className="flex flex-wrap gap-1 mb-2">
                   {project.tags.map((tag, i) => (
                     <Badge key={i} variant="secondary" className="text-xs pixel-badge hover:bg-[var(--cute-highlight)]">{tag}</Badge>
@@ -262,7 +268,7 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
               </CardContent>
               <CardFooter className="pt-0">
                 <div className="flex gap-2 w-full">
-                  {typeof project.githubUrl === "string" ? (
+                  {!project.githubUrl ? null : typeof project.githubUrl === "string" ? (
                     <Button variant="outline" size="sm" className="flex-1 border-2 border-[var(--cute-text)] rounded-none hover:bg-[var(--cute-highlight)] text-[var(--cute-text)]" asChild>
                       <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
                         <Github className="mr-2 h-4 w-4" /> Code
@@ -285,14 +291,14 @@ export default function Projects({ windowWidth }: { windowWidth?: number }) {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
-                  <Button size="sm" className="flex-1 border-2 border-[var(--cute-text)] rounded-none bg-[var(--cute-text)] text-white hover:bg-[var(--cute-text)]/90" asChild>
+                  <Button size="sm" className="flex-1 border-2 border-[var(--cute-text)] rounded-none bg-[var(--cute-text)] text-[var(--cute-on-text)] hover:bg-[var(--cute-text)]/90" asChild>
                     <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" /> Demo
                     </a>
                   </Button>
                 </div>
               </CardFooter>
-            </Card>
+            </MagicCard>
           </AnimatedContent>
         ))}
       </div>

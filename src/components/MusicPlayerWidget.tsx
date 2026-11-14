@@ -4,15 +4,16 @@ import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import sanrio from "../assets/sanrio.png";
-import Forward from "../assets/Forward.png";
-import Previous from "../assets/Previous.png";
-import MusicWallpaper from "../assets/MusicWallPaper.gif";
-import SliderIcon from "../assets/SliderIcon.png";
-import MusicPlayerImage from "../assets/MusicPlayerImage.png";
-import PlaylistIcon from "../assets/PlaylistIcon.png";
-import CinamonExit from "../assets/CinamonExit.png";
+import sanrio from "../assets/music/ui/sanrio.webp";
+import Forward from "../assets/music/ui/Forward.webp";
+import Previous from "../assets/music/ui/Previous.webp";
+import MusicWallpaper from "../assets/music/ui/MusicWallPaper.webp";
+import SliderIcon from "../assets/music/ui/SliderIcon.webp";
+import MusicPlayerImage from "../assets/music/ui/MusicPlayerImage.webp";
+import PlaylistIcon from "../assets/music/ui/PlaylistIcon.webp";
+import CinamonExit from "../assets/music/ui/CinamonExit.webp";
 import { AudioContext } from "./audio-context";
+import { GlassPanel } from "@/components/GlassPanel";
 import { useAppSound } from "./sound-context";
 import { useAchievements } from "./achievement-context";
 import { playlist, type Track } from "@/types/types";
@@ -403,14 +404,9 @@ export default function MusicPlayerWidget({
         {/* "Click to play" hint — only shown while paused */}
         {!isPlaying && (
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 flex flex-col items-center pointer-events-none animate-bounce">
-            <div className="liquidGlass-wrapper">
-              <div className="liquidGlass-effect" />
-              <div className="liquidGlass-tint" />
-              <div className="liquidGlass-shine" />
-              <div className="liquidGlass-content px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-white">
-                ♪ click to play
-              </div>
-            </div>
+            <GlassPanel radius="1rem" width="max-content" contentClassName="px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-white">
+              ♪ click to play
+            </GlassPanel>
             <span
               className="text-[8px] leading-none mt-0.5"
               style={{ color: 'var(--cute-border)' }}
@@ -434,7 +430,7 @@ export default function MusicPlayerWidget({
           disabled={isLoading}
         >
 
-          <img src={MusicPlayerImage} alt="Music Player" />
+          <img src={MusicPlayerImage} alt="Open music player" />
           <div
             ref={albumCoverRef}
             className="absolute top-[60.5%] left-[46%] transform -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full overflow-hidden border-2 border-white/30"
@@ -488,7 +484,7 @@ export default function MusicPlayerWidget({
                   onMouseEnter={() => handleButtonHover(1)}
                   onMouseLeave={() => handleButtonLeave(1)}
                 >
-                  <img src={PlaylistIcon} alt="Playlist Icon" />
+                  <img src={PlaylistIcon} alt="Toggle playlist" />
                   <div className="absolute top-[21%] left-[30%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                     <List className="h-4 w-4" />
                   </div>
@@ -505,7 +501,7 @@ export default function MusicPlayerWidget({
                   onMouseEnter={() => handleButtonHover(2)}
                   onMouseLeave={() => handleButtonLeave(2)}
                 >
-                  <img src={CinamonExit} alt="Cinamon Exit" />
+                  <img src={CinamonExit} alt="Close player" />
                   <div className="absolute top-[55%] left-[46%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                     <X className="h-4 w-4" />
                   </div>
@@ -573,7 +569,7 @@ export default function MusicPlayerWidget({
                 onMouseLeave={() => handleButtonLeave(3)}
                 disabled={isLoading}
               >
-                <img src={Previous} alt="previous" />
+                <img src={Previous} alt="Previous track" />
                 <div className="absolute top-1/2 left-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                   <SkipBack className="h-4 w-4" />
                 </div>
@@ -592,7 +588,7 @@ export default function MusicPlayerWidget({
                 onMouseLeave={() => handleButtonLeave(4)}
                 disabled={isLoading}
               >
-                <img src={sanrio} alt="sanrio" />
+                <img src={sanrio} alt={isLoading ? "Loading" : isPlaying ? "Pause" : "Play"} />
                 <div className="absolute top-1/2 left-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -618,7 +614,7 @@ export default function MusicPlayerWidget({
                 onMouseLeave={() => handleButtonLeave(5)}
                 disabled={isLoading}
               >
-                <img src={Forward} alt="forward" />
+                <img src={Forward} alt="Next track" />
                 <div className="absolute top-1/2 left-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                   <SkipForward className="h-4 w-4" />
                 </div>
@@ -758,21 +754,15 @@ export default function MusicPlayerWidget({
           ref={mobilePlaylistModalRef}
           className="absolute bottom-full left-0 right-0 mb-3 z-50"
         >
-          <div
-            className="liquidGlass-wrapper"
-            style={{ borderRadius: "1.25rem", flexDirection: "column", boxShadow: "0 -8px 32px rgba(0,0,0,0.35)" }}
-          >
-            <div className="liquidGlass-effect" style={{ borderRadius: "1.25rem" }} />
-            <div className="liquidGlass-tint" style={{ borderRadius: "1.25rem" }} />
-            <div className="liquidGlass-shine" style={{ borderRadius: "1.25rem" }} />
-            <div className="liquidGlass-content w-full" style={{ padding: "1rem" }}>
+          <GlassPanel radius="1.25rem" contentClassName="p-4">
+            <div className="w-full">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-white font-bold text-base">Playlist</h3>
                 <button
                   className="w-8 relative text-center cursor-pointer p-0 hover:bg-transparent dark:hover:bg-transparent"
                   onClick={handleMobilePlaylistClose}
                 >
-                  <img src={CinamonExit} alt="Close" />
+                  <img src={CinamonExit} alt="Close playlist" />
                   <div className="absolute top-[55%] left-[46%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                     <X className="h-3 w-3" />
                   </div>
@@ -815,7 +805,7 @@ export default function MusicPlayerWidget({
                 ))}
               </div>
             </div>
-          </div>
+          </GlassPanel>
         </div>
       )}
 
@@ -845,7 +835,7 @@ export default function MusicPlayerWidget({
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white truncate w-full">
                   {currentTrack.title}
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-300 truncate w-full">
+                <p className="text-sm text-gray-700 dark:text-gray-200 truncate w-full">
                   {currentTrack.artist}
                 </p>
               </div>
@@ -866,7 +856,7 @@ export default function MusicPlayerWidget({
                     onMouseLeave={() => handleButtonLeave(6)}
                     disabled={isLoading}
                   >
-                    <img src={Previous} alt="previous" />
+                    <img src={Previous} alt="Previous track" />
                     <div className="absolute top-1/2 left-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                       <SkipBack className="h-3 w-3" />
                     </div>
@@ -885,7 +875,7 @@ export default function MusicPlayerWidget({
                     onMouseLeave={() => handleButtonLeave(7)}
                     disabled={isLoading}
                   >
-                    <img src={sanrio} alt="sanrio" />
+                    <img src={sanrio} alt={isLoading ? "Loading" : isPlaying ? "Pause" : "Play"} />
                     <div className="absolute top-1/2 left-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                       {isLoading ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
@@ -911,7 +901,7 @@ export default function MusicPlayerWidget({
                     onMouseLeave={() => handleButtonLeave(8)}
                     disabled={isLoading}
                   >
-                    <img src={Forward} alt="forward" />
+                    <img src={Forward} alt="Next track" />
                     <div className="absolute top-1/2 left-[55%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                       <SkipForward className="h-3 w-3" />
                     </div>
@@ -930,7 +920,7 @@ export default function MusicPlayerWidget({
                   onMouseLeave={() => handleButtonLeave(9)}
                   disabled={isLoading}
                 >
-                  <img src={PlaylistIcon} alt="Playlist Icon" />
+                  <img src={PlaylistIcon} alt="Toggle playlist" />
                   <div className="absolute top-[20%] left-[30%] transform -translate-x-1/2 -translate-y-1/2 text-[#74cef7]">
                     <List className="h-3 w-3" />
                   </div>

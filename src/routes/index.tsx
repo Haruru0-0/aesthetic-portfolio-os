@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SoundProvider, useAppSound } from "@/components/sound-context";
+import { GlassPanel } from "@/components/GlassPanel";
+import { WallpaperContext } from "@/components/wallpaper-context";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import Wallpaper from "../assets/lockscreen.jpg";
-import MobileWallpaper from "../assets/MobileLockscreen.jpg";
+import { useWallpaperSelection } from "@/lib/use-wallpaper-selection";
+import { LockScreenSwitcher } from "@/components/LockScreenSwitcher";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export const Route = createFileRoute("/")({
@@ -27,6 +29,10 @@ function LoginScreen() {
 
   const isDesktop = useMediaQuery("(min-width: 650px)");
 
+  const desktopLock = useWallpaperSelection("desktop-lock");
+  const mobileLock = useWallpaperSelection("mobile-lock");
+  const desktopWallpaperRef = useRef<HTMLImageElement>(null);
+  const mobileWallpaperRef = useRef<HTMLImageElement>(null);
   const timeRef = useRef<HTMLHeadingElement>(null);
   const dateRef = useRef<HTMLParagraphElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
@@ -218,16 +224,33 @@ function LoginScreen() {
   }, [isWrongPassword]);
 
   return (
-    <>
+    <WallpaperContext.Provider value={isDesktop ? desktopWallpaperRef : mobileWallpaperRef}>
       <div
         ref={containerRef}
         className="relative flex flex-col items-center justify-center w-full min-h-screen overflow-hidden"
         onClick={handleScreenClick}
       >
-        <div className="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
-          style={{ backgroundImage: `url(${Wallpaper})`, opacity: isDesktop ? 1 : 0 }} />
-        <div className="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
-          style={{ backgroundImage: `url(${MobileWallpaper})`, opacity: isDesktop ? 0 : 1 }} />
+        <img
+          key={desktopLock.current?.id}
+          ref={desktopWallpaperRef}
+          src={desktopLock.current?.src}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
+          style={{ opacity: isDesktop ? 1 : 0 }}
+        />
+        <img
+          key={mobileLock.current?.id}
+          ref={mobileWallpaperRef}
+          src={mobileLock.current?.src}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
+          style={{ opacity: isDesktop ? 0 : 1 }}
+        />
+        <LockScreenSwitcher choice={isDesktop ? desktopLock : mobileLock} portrait={!isDesktop} hidden={showLogin} />
         {/* Time display */}
         <div className="flex flex-col items-center">
           <h1 ref={timeRef} className="text-6xl font-bold text-white mb-2">
@@ -248,11 +271,8 @@ function LoginScreen() {
             className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <div ref={loginCardRef} className="liquidGlass-wrapper lockscreen-card w-64" style={{ opacity: 0 }}>
-              <div className="liquidGlass-effect" />
-              <div className="liquidGlass-tint" />
-              <div className="liquidGlass-shine" />
-              <div className="liquidGlass-content w-full flex flex-col items-center">
+            <div ref={loginCardRef} className="w-64" style={{ opacity: 0 }}>
+              <GlassPanel radius="2rem" contentClassName="flex flex-col items-center p-6 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] hover:p-[1.7rem]">
                 <Avatar className="w-20 h-20 mb-4 border-4 border-white/40">
                   <AvatarImage
                     src="/placeholder.svg?height=80&width=80"
@@ -293,27 +313,24 @@ function LoginScreen() {
                     Hint: The password is &apos;haru&apos;
                   </p>
                 </form>
-              </div>
+              </GlassPanel>
             </div>
 
             <button
               ref={xButtonRef}
-              className="liquidGlass-wrapper lockscreen-cancel mt-4 cursor-pointer p-0"
+              className="mt-4 cursor-pointer p-0"
               style={{ opacity: 0 }}
               onClick={handleCancel}
             >
-              <div className="liquidGlass-effect" />
-              <div className="liquidGlass-tint" />
-              <div className="liquidGlass-shine" />
-              <div className="liquidGlass-content">
+              <GlassPanel radius="1.5rem" width="max-content" contentClassName="flex items-center justify-center p-2 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] hover:p-3">
                 <X className="h-5 w-5 text-white" />
                 <span className="sr-only">Cancel</span>
-              </div>
+              </GlassPanel>
             </button>
           </div>
         )}
       </div>
-    </>
+    </WallpaperContext.Provider>
   );
 }
 

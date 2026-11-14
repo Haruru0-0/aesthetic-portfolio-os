@@ -1,5 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAchievements } from '@/components/achievement-context'
+import { cn } from '@/lib/utils'
+import { PROFILE, SKILL_CATEGORIES } from '@/data/profile'
+import {
+  TerminalAnimationRoot,
+  TerminalAnimationWindow,
+  TerminalAnimationContent,
+  TerminalAnimationCommandBar,
+  TerminalAnimationOutput,
+  TerminalAnimationTabList,
+  TerminalAnimationTabTrigger,
+  TerminalAnimationTrailingPrompt,
+  type TabContent,
+} from '@/components/ui/terminal-animation'
 
 type HistoryEntry = {
   type: 'input' | 'output' | 'error' | 'success'
@@ -11,18 +24,13 @@ const PROMPT_PATH = ':~$'
 
 const FILES: Record<string, string[]> = {
   'about.txt': [
-    'Name:       Ahmad Kanaan',
-    'Role:       Full-Stack Developer',
-    'Experience: 4 years',
-    'Location:   Available worldwide 🌍',
+    `Name:       ${PROFILE.name}`,
+    `Role:       ${PROFILE.role}`,
+    `Experience: ${PROFILE.years}`,
+    `Location:   ${PROFILE.location}`,
     'Status:     Open to opportunities ✅',
   ],
-  'skills.txt': [
-    'Frontend:  React, Next.js, TypeScript, TailwindCSS',
-    'Backend:   Node.js, Express, Supabase',
-    'Tools:     Git, Figma, Vite',
-    'Currently: Building cool things 🚀',
-  ],
+  'skills.txt': SKILL_CATEGORIES.map((c) => `${c.name.padEnd(22)}${c.skills.join(', ')}`),
   'projects.txt': [
     '1. Nebula             — AI-powered platform',
     '2. Facilify           — Productivity app',
@@ -34,9 +42,9 @@ const FILES: Record<string, string[]> = {
     'Open the Projects window for full details!',
   ],
   'contact.txt': [
-    'Email:    ahmad.w.kanaan@proton.me',
-    'GitHub:   github.com/Haruru0-0',
-    'LinkedIn: linkedin.com/in/ahmadkanaan',
+    `Email:    ${PROFILE.email}`,
+    `GitHub:   ${PROFILE.github.replace('https://', '')}`,
+    `LinkedIn: ${PROFILE.linkedin.replace('https://', '')}`,
     '',
     "Or just open the Contact window — it's right there! 👀",
   ],
@@ -48,6 +56,77 @@ const FILES: Record<string, string[]> = {
     '',
     'Hint: try running → sudo hire-ahmad',
   ],
+}
+
+const SHOWREEL_TABS: TabContent[] = [
+  {
+    label: 'whoami',
+    command: 'whoami',
+    lines: [
+      { text: PROFILE.name, color: 'text-white', delay: 120 },
+      { text: PROFILE.role + ' · ' + PROFILE.years, color: 'text-[#74defc]', delay: 140 },
+      { text: PROFILE.location, color: 'text-[#74defc]', delay: 140 },
+      { text: 'Open to opportunities', color: 'text-green-400', delay: 200 },
+    ],
+  },
+  {
+    label: 'skills',
+    command: 'cat skills.txt',
+    lines: SKILL_CATEGORIES.map((c) => ({
+      text: c.name.padEnd(22) + c.skills.join(', '),
+      color: 'text-[#74defc]',
+      delay: 160,
+    })),
+  },
+  {
+    label: 'projects',
+    command: 'cat projects.txt',
+    lines: (FILES['projects.txt'] ?? []).map((text) => ({ text, color: 'text-[#74defc]', delay: 140 })),
+  },
+]
+
+function Showreel() {
+  const cursor = <span className="t-cursor ml-px inline-block h-[1.1em] w-[0.55em] bg-[#74defc] align-text-bottom" />
+  const prompt = (
+    <>
+      <span className="text-green-400">{PROMPT_USER}</span>
+      <span className="text-white/70">{PROMPT_PATH}</span>
+      <span>&nbsp;</span>
+    </>
+  )
+  return (
+    <TerminalAnimationRoot tabs={SHOWREEL_TABS} alwaysDark hideCursorOnComplete={false} className="flex flex-col gap-3">
+      <TerminalAnimationTabList className="flex flex-wrap gap-2">
+        {SHOWREEL_TABS.map((t, i) => (
+          <TerminalAnimationTabTrigger
+            key={t.label}
+            index={i}
+            className="border border-[#74defc]/40 px-3 py-1 text-xs text-[#74defc] data-[state=active]:bg-[#74defc]/20"
+          >
+            {t.label}
+          </TerminalAnimationTabTrigger>
+        ))}
+      </TerminalAnimationTabList>
+      <TerminalAnimationWindow animateOnVisible={false} minHeight="0" backgroundColor="transparent" className="rounded-none">
+        <TerminalAnimationContent className="px-0 py-2">
+          <div className="flex flex-wrap leading-relaxed">
+            {prompt}
+            <TerminalAnimationCommandBar className="text-white" cursor={cursor} />
+          </div>
+          <TerminalAnimationOutput
+            className="mt-2"
+            renderLine={(line, _i, visible) =>
+              visible ? <div className={cn('whitespace-pre-wrap leading-relaxed', line.color)}>{line.text || '\u00A0'}</div> : null
+            }
+          />
+          <TerminalAnimationTrailingPrompt className="mt-2 flex flex-wrap">
+            {prompt}
+            {cursor}
+          </TerminalAnimationTrailingPrompt>
+        </TerminalAnimationContent>
+      </TerminalAnimationWindow>
+    </TerminalAnimationRoot>
+  )
 }
 
 const WELCOME: HistoryEntry[] = [
@@ -65,6 +144,7 @@ export default function Terminal() {
   const [cmdHistory, setCmdHistory] = useState<string[]>([])
   const [historyIdx, setHistoryIdx] = useState(-1)
   const [focused, setFocused] = useState(true)
+  const [mode, setMode] = useState<'shell' | 'showreel'>('shell')
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -106,6 +186,7 @@ export default function Terminal() {
         '│  whoami             about you            │',
         '│  neofetch           system info          │',
         '│  sudo hire-ahmad    make an offer 👀     │',
+        '│  showreel           animated tour        │',
         '│  ping               test connection      │',
         '│  date               current date & time  │',
         '│  echo <text>        print text           │',
@@ -124,6 +205,9 @@ export default function Terminal() {
       } else {
         newEntries.push({ type: 'error', content: `cat: ${file}: No such file or directory` })
       }
+    } else if (cmd === 'showreel') {
+      newEntries.push({ type: 'output', content: 'Starting showreel...' })
+      setMode('showreel')
     } else if (cmd === 'whoami') {
       newEntries.push({ type: 'output', content: "visitor — a curious explorer browsing Ahmad's portfolio ✨" })
     } else if (cmd === 'echo') {
@@ -146,7 +230,7 @@ export default function Terminal() {
         '  ██╔══██╗ ─────────────────────────',
         '  ███████║ OS:       Portfolio OS 1.0',
         '  ██╔══██║ Host:     Ahmad Kanaan',
-        '  ██║  ██║ Kernel:   React 18 + Vite',
+        '  ██║  ██║ Kernel:   React 19 + Vite',
         '  ╚═╝  ╚═╝ Shell:    PortfolioSH 1.0',
         '           Theme:    Liquid Glass ✨',
         '           Terminal: This one :)',
@@ -210,7 +294,7 @@ export default function Terminal() {
       `}</style>
 
       {/* hidden off-screen input captures all keystrokes */}
-      <input
+      {mode === 'shell' && <input
         ref={inputRef}
         value={input}
         onChange={e => setInput(e.target.value)}
@@ -219,18 +303,46 @@ export default function Terminal() {
         onBlur={() => setFocused(false)}
         style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, width: 1, height: 1 }}
         autoFocus
+        aria-label="Terminal input"
         autoComplete="off"
         spellCheck={false}
-      />
+      />}
 
       <div
         ref={scrollRef}
+        role="log"
+        aria-live="polite"
+        aria-label="Terminal output"
         className="flex flex-col bg-[#0d1117] font-mono text-sm overflow-y-auto -m-5 select-text"
         style={{ height: 'calc(100% + 40px)', padding: '1rem' }}
         onClick={() => inputRef.current?.focus()}
       >
+        <div role="tablist" aria-label="Terminal mode" className="sticky top-0 z-10 -mx-4 -mt-4 mb-3 flex gap-2 border-b border-white/10 bg-[#0d1117] px-4 py-2">
+          {(['shell', 'showreel'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              aria-selected={mode === m}
+              onClick={(e) => {
+                e.stopPropagation()
+                setMode(m)
+                if (m === 'shell') setTimeout(() => inputRef.current?.focus(), 0)
+              }}
+              className={cn(
+                'cursor-pointer px-3 py-1 text-xs border',
+                mode === m ? 'border-[#74defc] bg-[#74defc]/20 text-white' : 'border-white/20 text-[#74defc]'
+              )}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+
+        {mode === 'showreel' && <Showreel />}
+
         {/* Rendered history */}
-        {history.map((entry, i) => (
+        {mode === 'shell' && history.map((entry, i) => (
           <div key={i} className="leading-relaxed whitespace-pre-wrap break-all min-h-[1.5em]">
             {entry.type === 'input' ? (
               <>
@@ -245,7 +357,7 @@ export default function Terminal() {
         ))}
 
         {/* Current live input line */}
-        <div className="leading-relaxed whitespace-pre-wrap break-all flex items-center min-h-[1.5em]">
+        {mode === 'shell' && <div className="leading-relaxed whitespace-pre-wrap break-all flex items-center min-h-[1.5em]">
           <span className="text-green-400">{PROMPT_USER}</span>
           <span className="text-white/70">{PROMPT_PATH}</span>
           <span className="text-white"> {input}</span>
@@ -253,7 +365,7 @@ export default function Terminal() {
             className="t-cursor inline-block w-[0.55em] h-[1.1em] bg-[#74defc] ml-px align-text-bottom flex-shrink-0"
             style={{ opacity: focused ? undefined : 0.3 }}
           />
-        </div>
+        </div>}
       </div>
     </>
   )

@@ -455,11 +455,13 @@ export function AppWindow({
               >
                 <div
                   className="window-drag-handle relative z-50"
+                  onContextMenu={(e) => e.stopPropagation()}
                   onMouseDown={!isMaximized ? handleSnapDragStart : undefined}
                 >
                   <span className="font-semibold text-sm truncate">{title}</span>
                   <div className="flex gap-1 shrink-0">
                     <button
+                      aria-label={`Minimize ${title}`}
                       onClick={() => handleButtonClick(handleMinimize)}
                       className="window-button"
                       onMouseEnter={(e) => handleButtonAnimation(e, "enter")}
@@ -472,6 +474,7 @@ export function AppWindow({
                     {!isMobile && (
                       <div className="relative" onMouseLeave={handleMaximizeLeave}>
                         <button
+                          aria-label={isMaximized ? `Restore ${title}` : `Maximize ${title}`}
                           onClick={() => { setShowSnapMenu(false); handleButtonClick(toggleMaximize); }}
                           className="window-button"
                           onMouseEnter={(e) => {
@@ -498,6 +501,7 @@ export function AppWindow({
                       </div>
                     )}
                     <button
+                      aria-label={`Close ${title}`}
                       onClick={() => handleButtonClick(handleClose)}
                       className="window-button window-button-close"
                       onMouseEnter={(e) => handleButtonAnimation(e, "enter")}
@@ -512,6 +516,9 @@ export function AppWindow({
                 <div
                   ref={contentRefCallback}
                   className="window-content"
+                onContextMenu={(e) => e.stopPropagation()}
+                role="region"
+                aria-label={title}
                   data-width={contentWidth}
                 >
                   <ScrollContainerProvider container={contentRef}>
@@ -562,11 +569,13 @@ export function AppWindow({
               style={{ zIndex: zIndex }}
               className="window-container"
             >
-              <div className="window-drag-handle relative z-50">
+              <div className="window-drag-handle relative z-50"
+                  onContextMenu={(e) => e.stopPropagation()}>
                 <span className="font-semibold text-sm truncate">{title}</span>
                 <div className="flex gap-1 shrink-0">
                   <button
-                    onClick={() => handleButtonClick(handleMinimize)}
+                    aria-label={`Minimize ${title}`}
+                      onClick={() => handleButtonClick(handleMinimize)}
                     className="window-button"
                     onMouseEnter={(e) => handleButtonAnimation(e, "enter")}
                     onMouseLeave={(e) => handleButtonAnimation(e, "leave")}
@@ -578,6 +587,7 @@ export function AppWindow({
                   {!isMobile && (
                     <div className="relative" onMouseLeave={handleMaximizeLeave}>
                       <button
+                        aria-label={isMaximized ? `Restore ${title}` : `Maximize ${title}`}
                         onClick={() => handleButtonClick(toggleMaximize)}
                         className="window-button"
                         onMouseEnter={(e) => {
@@ -604,7 +614,8 @@ export function AppWindow({
                     </div>
                   )}
                   <button
-                    onClick={() => handleButtonClick(handleClose)}
+                    aria-label={`Close ${title}`}
+                      onClick={() => handleButtonClick(handleClose)}
                     className="window-button window-button-close"
                     onMouseEnter={(e) => handleButtonAnimation(e, "enter")}
                     onMouseLeave={(e) => handleButtonAnimation(e, "leave")}
@@ -618,6 +629,9 @@ export function AppWindow({
               <div
                 ref={contentRefCallback}
                 className="window-content"
+                onContextMenu={(e) => e.stopPropagation()}
+                role="region"
+                aria-label={title}
                 data-width={contentWidth}
               >
                 <ScrollContainerProvider container={contentRef}>

@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
-import KuruKuru from "../assets/KuruKuru.gif";
+import KuruKuru from "../assets/mascots/KuruKuru.webp";
 
 export function CuteSuspenseFallback() {
   const textRef = useRef<HTMLParagraphElement>(null);

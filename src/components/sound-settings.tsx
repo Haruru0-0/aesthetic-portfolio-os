@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { useAppSound } from './sound-context'
 import { useMediaQuery } from '@/hooks/use-media-query'
+import { GlassPanel } from "@/components/GlassPanel"
+import { IconTile } from "@/components/IconTile"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +16,9 @@ import {
   DrawerContent,
   DrawerTrigger,
 } from "@/components/ui/drawer"
-import SliderIcon from "../assets/SliderIcon.png"
+import SliderIcon from "../assets/music/ui/SliderIcon.webp"
+import { GlassSwitch } from "@/components/ui/glass-switch"
+import { Label } from "@/components/ui/8bit/label"
 
 interface SoundContentProps {
   isSoundEnabled: boolean
@@ -27,37 +31,27 @@ interface SoundContentProps {
 
 function SoundContent({ isSoundEnabled, volume, onToggle, onVolumeChange, onVolumeCommit, onTest }: SoundContentProps) {
   return (
-    <div className="liquidGlass-wrapper dropdown">
-      <div className="liquidGlass-effect" />
-      <div className="liquidGlass-tint" />
-      <div className="liquidGlass-shine" />
-      <div className="liquidGlass-content p-4">
+    <GlassPanel radius="0.75rem" contentClassName="p-4">
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-3">
-            <Gamepad2 className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-slate-900">8-Bit Sound Effects</span>
+            <Gamepad2 className="h-4 w-4 text-sky-200" />
+            <span className="text-sm font-medium text-slate-100">8-Bit Sound Effects</span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-900">Retro Audio</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onToggle}
-              className="h-8 text-slate-900 border-white/20 bg-sky-500/20 hover:bg-sky-500/30 hover:text-slate-900"
-            >
-              {isSoundEnabled ? 'On' : 'Off'}
-            </Button>
+            <Label htmlFor="retro-audio" className="text-sm text-slate-100">Retro Audio</Label>
+            <GlassSwitch id="retro-audio" checked={isSoundEnabled} onCheckedChange={() => onToggle()} />
           </div>
 
           {isSoundEnabled && (
             <>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-900">Volume</span>
-                  <span className="text-xs text-slate-700">{Math.round(volume * 100)}%</span>
+                  <Label htmlFor="master-volume" className="text-sm text-slate-100">Master Volume</Label>
+                  <span className="text-xs text-slate-200">{Math.round(volume * 100)}%</span>
                 </div>
                 <Slider
+                  id="master-volume"
                   value={[volume]}
                   max={1}
                   min={0}
@@ -77,23 +71,22 @@ function SoundContent({ isSoundEnabled, volume, onToggle, onVolumeChange, onVolu
                 variant="outline"
                 size="sm"
                 onClick={onTest}
-                className="w-full text-xs text-slate-900 border-white/20 bg-sky-500/20 hover:bg-sky-500/30 hover:text-slate-900"
+                className="w-full text-xs text-slate-100 border-white/20 bg-sky-500/20 hover:bg-sky-500/30 hover:text-white"
               >
                 🎮 Test Retro Sounds
               </Button>
             </>
           )}
 
-          <div className="text-xs text-slate-700">
+          <div className="text-xs text-slate-200">
             Classic 8-bit arcade sounds with square waves and chiptune effects
           </div>
         </div>
-      </div>
-    </div>
+    </GlassPanel>
   )
 }
 
-export function SoundSettings() {
+export function SoundSettings({ variant = "icon" }: { variant?: "icon" | "tile" } = {}) {
   const { isSoundEnabled, setSoundEnabled, volume, setVolume, playClickSound, playPowerUpSound, playMenuSound } = useAppSound()
   const [open, setOpen] = useState(false)
   const isDesktop = useMediaQuery("(min-width: 768px)")
@@ -112,7 +105,12 @@ export function SoundSettings() {
     setTimeout(() => playPowerUpSound(), 400)
   }
 
-  const TriggerButton = (
+  const TriggerButton = variant === "tile" ? (
+    <IconTile
+      icon={isSoundEnabled ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
+      label="Sound"
+    />
+  ) : (
     <Button
       variant="ghost"
       size="icon"

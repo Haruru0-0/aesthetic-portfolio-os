@@ -1,11 +1,11 @@
-import BlueCover from "../assets/blue.jpg";
-import BlueSong from "../assets/blue.mp4";
-import LoveforYouCover from "../assets/LoveforYou.jpg";
-import LoveforYouSong from "../assets/LoveforYou.mp4";
-import LoveWaveToEarthCover from "../assets/Love-wavetoearth.jpg";
-import LoveWaveToEarthSong from "../assets/Love-wavetoearth.mp4";
-import GlueSongCover from "../assets/GlueSong.jpg";
-import GlueSong from "../assets/GlueSong.mp4";
+import BlueCover from "../assets/music/tracks/blue.webp";
+import BlueSong from "../assets/music/tracks/blue.mp4";
+import LoveforYouCover from "../assets/music/tracks/LoveforYou.webp";
+import LoveforYouSong from "../assets/music/tracks/LoveforYou.mp4";
+import LoveWaveToEarthCover from "../assets/music/tracks/Love-wavetoearth.webp";
+import LoveWaveToEarthSong from "../assets/music/tracks/Love-wavetoearth.mp4";
+import GlueSongCover from "../assets/music/tracks/GlueSong.webp";
+import GlueSong from "../assets/music/tracks/GlueSong.mp4";
 
 export interface Track {
   id: number;

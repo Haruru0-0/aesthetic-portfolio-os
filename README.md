@@ -1,161 +1,94 @@
 # Aesthetic Portfolio OS
 
-A personal portfolio website designed to mimic a desktop operating system interface, built with modern web technologies and interactive UI components.
+A personal portfolio that looks and behaves like a desktop operating system: a lock screen, windows you can
+drag and resize, a dock, a command palette, wallpapers you can switch, and liquid-glass surfaces throughout.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-92.7%25-blue)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-6.8%25-38B2AC)](https://tailwindcss.com/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-Latest-646CFF?logo=vite)](https://vitejs.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-38B2AC)](https://tailwindcss.com/)
 
-## 🎨 Features
+## Features
 
-- **Desktop OS Interface**: Interactive desktop environment with draggable and resizable windows
-- **Authentication**: Login screen for portfolio access
-- **Multiple Sections**: Organized portfolio sections including:
-  - About Me
-  - Resume
-  - Projects
-  - Blog
-  - Links
-  - Contact Me
-- **Smooth Animations**: GSAP-powered animations for engaging interactions
-- **Responsive Design**: Built with Tailwind CSS for modern styling
-- **Type-Safe**: Full TypeScript support for robust development
+- **Desktop interface:** draggable, resizable, snappable windows; a dock with macOS-style magnification; a menu bar;
+  desktop icons you can reorder; a music player widget; 8-bit sound effects with a volume panel.
+- **Lock screen:** clock, password login, and a settings button (bottom right) to change the lock wallpaper.
+- **Windows:** About Me, Resume (with a career timeline), Projects, Blog (posts from Hashnode, with search), Links,
+  Contact (EmailJS form), Terminal (a shell and an animated showreel) and Achievements (unlockable, with an XP bar).
+- **Command palette:** `Ctrl/Cmd + K` opens apps, copies the email, downloads the resume and switches wallpapers.
+- **Right-click menu:** on the desktop, to open apps, sort icons, toggle sound, change theme and switch wallpapers.
+- **Wallpapers:** separate sets for desktop and mobile, home and lock screens. Drop an image into the right folder and
+  it appears in the switchers (see [Customizing](#customizing)).
+- **Mobile layout:** a home screen with a folder of apps, widgets, and a 2x2 control grid (Sound, Theme, Wallpaper, Search).
+- **Liquid glass:** blue-tinted glass with real edge refraction in Chromium (SVG) and Firefox/Safari (WebGL).
+- **Light and dark themes**, reduced-motion support, and a keyboard-friendly UI.
 
-## 🚀 Quick Start
+## Quick start
 
-### Prerequisites
+Requirements: Node.js 18+ and Yarn.
 
-- Node.js (v14 or higher)
-- Yarn package manager
-
-### Development
-
-1. Install dependencies:
 ```bash
 yarn install
+yarn dev        # http://localhost:3000
 ```
 
-2. Start the development server:
-```bash
-yarn dev
-```
+| Command | What it does |
+|---|---|
+| `yarn dev` | Start the dev server on port 3000 |
+| `yarn build` | Fetch the blog posts, then build for production into `dist/` |
+| `yarn serve` | Preview the production build |
+| `yarn fetch-blog` | Refresh `src/data/blog-posts.ts` from the Hashnode RSS feed |
+| `yarn test` | Run Vitest (there are no tests yet) |
 
-The application will be available at `http://localhost:3000`.
+## Customizing
 
-### Production Build
+- **Your details:** `src/data/profile.ts` holds the name, role, years of experience, contact details, links, skills and
+  interests used across the windows. Put your photo at `public/profile-photo.webp` and your resume at `public/resume.pdf`.
+- **Wallpapers:** add images to `src/assets/wallpapers/`. Each folder is read automatically, and the file name is the label.
 
-Build the application for production:
-```bash
-yarn build
-```
+  | Folder | Used for |
+  |---|---|
+  | `desktop/home/` | Desktop wallpaper switcher |
+  | `desktop/lock/` | Desktop lock screen |
+  | `mobile/home/` | Mobile home screen (portrait images) |
+  | `mobile/lock/` | Mobile lock screen (portrait images) |
 
-This creates an optimized build in the `dist` directory.
+- **Images:** use WebP. When converting photos, apply their EXIF rotation first or they can come out sideways.
+  `src/assets/README.md` describes every folder.
+- **Projects and blog:** projects are listed in `src/components/pages/projects.tsx`; the blog is fetched at build time
+  from the Hashnode RSS feed by `scripts/fetch-blog.mjs`.
 
-Preview the production build locally:
-```bash
-yarn serve
-```
+## Tech stack
 
-## 🧪 Testing
+- **React 19, TypeScript, Vite**, with **TanStack Router** (file-based routes in `src/routes`) and **TanStack Query**.
+- **Tailwind CSS 4** and **shadcn/ui** components. Extra components come from the registries configured in
+  `components.json` (`@8bitcn`, `@magicui`, `@cult-ui` and others); review anything a registry adds.
+- **GSAP** and **motion** for animation, `react-rnd` for windows, `@dnd-kit` for icon dragging, `cmdk` for the palette.
+- **@react-bits GlassSurface** for the liquid-glass panels (`src/components/GlassSurface.tsx`).
 
-Run the test suite with Vitest:
-
-```bash
-yarn test
-```
-
-## 🏗️ Project Structure
+## Project structure
 
 ```
 src/
-├── components/          # React components
-│   └── ui/             # Reusable UI components
-├── routes/             # File-based routing with TanStack Router
-├── pages/              # Page components
-├── hooks/              # Custom React hooks
-├── types/              # TypeScript type definitions
-├── utils/              # Utility functions
-└── App.tsx             # Root application component
+├── components/        # Desktop, windows, dock, menus, glass panels
+│   ├── pages/         # Window contents: about-me, resume, projects, blog, links, contact, terminal, achievements
+│   └── ui/            # shadcn and registry components (8bit/ for the pixel variants)
+├── routes/            # Lock screen (/) and desktop (/desktop)
+├── lib/               # Wallpaper lists, animations, helpers
+├── data/              # profile.ts and the generated blog-posts.ts
+├── assets/            # Images and tracks, grouped by use
+└── hooks/             # Shared hooks
+docs/memory/           # Project notes: architecture, decisions, gotchas, roadmap
 ```
 
-## 🛠️ Technology Stack
+`src/data/blog-posts.ts` and `src/routeTree.gen.ts` are generated; don't edit them by hand.
 
-### Frontend Framework
-- **React** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Build tool and dev server
+## Notes
 
-### Styling & UI
-- **Tailwind CSS** - Utility-first CSS framework
-- **GSAP** - Animation library for smooth interactions
+- Browsers differ on glass: Chromium bends the live page behind a panel, while Firefox and Safari bend the wallpaper
+  image. See `docs/memory/gotchas.md` for details and other traps.
+- The blog is refreshed daily by a GitHub Actions workflow, and the repository is mirrored to GitLab.
 
-### Routing & State
-- **TanStack Router** - Type-safe routing
-- **TanStack Query** - Server state management
+## License
 
-## 📝 Development Conventions
-
-### Styling
-- Tailwind CSS utility classes are preferred
-- Avoid custom CSS when possible
-- Use responsive design utilities
-
-### Components
-- Components are organized in `src/components`
-- Reusable UI components go in `src/components/ui`
-- Follow single responsibility principle
-
-### Routing
-- File-based routing with TanStack Router
-- Routes defined in `src/routes` directory
-- Type-safe route configuration
-
-### State Management
-- TanStack Query for server state
-- React hooks for component state
-- Consider Context API for global state if needed
-
-### Code Quality
-- Static typing with TypeScript
-- Code formatting and linting recommended
-- Follow ESLint conventions
-
-## 🎯 Usage
-
-### Login
-1. Access the application at the development/production URL
-2. Enter credentials on the login screen
-3. Successfully authenticated users are redirected to the desktop
-
-### Desktop Navigation
-- Click desktop icons to open portfolio sections
-- Drag windows to reposition them
-- Resize windows using the corner handles
-- Close windows by clicking the close button
-
-## 📦 Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `yarn install` | Install dependencies |
-| `yarn dev` | Start development server |
-| `yarn build` | Build for production |
-| `yarn serve` | Preview production build |
-| `yarn test` | Run tests with Vitest |
-
-## 📄 License
-
-This project is personal and can be used for portfolio purposes.
-
-## 🤝 Contributing
-
-This is a personal portfolio project. Contributions are welcome for improvements and bug fixes.
-
-## 📧 Contact
-
-For inquiries about this portfolio, please use the contact section within the application.
-
----
-
-**Built with ❤️ using React, TypeScript, and Vite**
+Personal project, free to use as a reference for your own portfolio.

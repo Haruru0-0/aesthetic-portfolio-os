@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Mail, Phone, MapPin, Send, Linkedin, Github, Twitter } from "lucide-react"
+import { Mail, Phone, MapPin, Send, Linkedin, Github, Loader2 } from "lucide-react"
+import { PROFILE } from "@/data/profile"
 import { ScrollContainerContext } from "@/components/animated-section"
 import { animateTextReveal, animateBlurText } from "@/lib/animations"
 import AnimatedContent from "@/components/AnimatedContent"
@@ -64,15 +65,14 @@ export default function Contact({ windowWidth }: { windowWidth?: number }) {
   }
 
   const contactInfo = [
-    { icon: <Mail className="h-5 w-5" />,   title: "Email",    value: "ahmad.w.kanaan@proton.me", link: "mailto:ahmad.w.kanaan@proton.me" },
-    { icon: <Phone className="h-5 w-5" />,  title: "Phone",    value: "+961 81 849 055",           link: "tel:+96181849055" },
-    { icon: <MapPin className="h-5 w-5" />, title: "Location", value: "Beirut, Lebanon",           link: "https://maps.google.com/?q=Beirut,Lebanon" },
+    { icon: <Mail className="h-5 w-5" />,   title: "Email",    value: PROFILE.email,    link: `mailto:${PROFILE.email}` },
+    { icon: <Phone className="h-5 w-5" />,  title: "Phone",    value: PROFILE.phone,    link: PROFILE.phoneHref },
+    { icon: <MapPin className="h-5 w-5" />, title: "Location", value: PROFILE.location, link: `https://maps.google.com/?q=${encodeURIComponent(PROFILE.location)}` },
   ]
 
   const socialLinks = [
-    { icon: <Linkedin className="h-5 w-5" />, name: "LinkedIn", url: "https://linkedin.com/in/username" },
-    { icon: <Github className="h-5 w-5" />,   name: "GitHub",   url: "https://github.com/username" },
-    { icon: <Twitter className="h-5 w-5" />,  name: "Twitter",  url: "https://twitter.com/username" },
+    { icon: <Linkedin className="h-5 w-5" />, name: "LinkedIn", url: PROFILE.linkedin },
+    { icon: <Github className="h-5 w-5" />,   name: "GitHub",   url: PROFILE.github },
   ]
 
   const isMultiColumn = windowWidth ? windowWidth >= 750 : false
@@ -87,8 +87,8 @@ export default function Contact({ windowWidth }: { windowWidth?: number }) {
       <div className={`grid ${isMultiColumn ? "grid-cols-3" : "grid-cols-1"} gap-8`}>
         <AnimatedContent direction="horizontal" reverse distance={55} ease="back.out(1.4)" className={`${isMultiColumn ? "col-span-1" : ""} space-y-6`}>
           {contactInfo.map((info, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow border-0 pixel-card">
-              <CardContent className="p-4 flex items-center gap-4">
+            <Card className="pixel-card border-0 gap-3 py-4" key={index}>
+              <CardContent className="flex items-center gap-4">
                 <div className="bg-[var(--cute-highlight)] p-3 rounded-none shrink-0 border-2 border-[var(--cute-text)] text-[var(--cute-text)]">{info.icon}</div>
                 <div className="min-w-0">
                   <h3 className="font-medium pixel-text">{info.title}</h3>
@@ -96,7 +96,7 @@ export default function Contact({ windowWidth }: { windowWidth?: number }) {
                     href={info.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm opacity-70 hover:text-[var(--cute-text)] truncate block"
+                    className="text-sm opacity-85 hover:text-[var(--cute-text)] truncate block"
                     onClick={playClickSound}
                   >
                     {info.value}
@@ -126,47 +126,51 @@ export default function Contact({ windowWidth }: { windowWidth?: number }) {
         </AnimatedContent>
 
         <AnimatedContent direction="horizontal" distance={55} ease="back.out(1.4)" className={isMultiColumn ? "col-span-2" : ""}>
-          <Card className="border-0 pixel-card">
+          <Card className="pixel-card border-0 gap-3 py-4">
             <CardContent className="p-6">
               {isSubmitted ? (
                 <div className="text-center py-8">
                   <div className="bg-green-100 text-green-800 p-3 rounded-full inline-flex mb-4 border-2 border-green-800">
                     <Send className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 pixel-title">Message Sent!</h3>
-                  <p className="opacity-80">Thank you for reaching out. I'll get back to you as soon as possible.</p>
+                  <h3 role="status" className="text-xl font-bold mb-2 pixel-title">Message Sent!</h3>
+                  <p className="opacity-90 mb-4">Thank you for reaching out. I'll get back to you as soon as possible.</p>
+                  <Button className="border-2 border-[var(--cute-text)] rounded-none hover:bg-[var(--cute-highlight)] text-[var(--cute-text)]" type="button" variant="outline" onClick={() => setIsSubmitted(false)}
+                    >
+                    Send another message
+                  </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {error && (
-                    <div className="bg-red-100 text-red-800 p-3 rounded-none border-2 border-red-800">{error}</div>
+                    <div role="alert" className="bg-red-100 text-red-800 p-3 rounded-none border-2 border-red-800">{error}</div>
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="pixel-text">Your Name</Label>
                       <Input id="name" name="name" placeholder="John Doe" value={formState.name} onChange={handleChange} required
-                        className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-0 focus-visible:border-[var(--cute-highlight)]" />
+                        className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-2 focus-visible:ring-[var(--cute-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-bg)] focus-visible:border-[var(--cute-text)]" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email" className="pixel-text">Email Address</Label>
                       <Input id="email" name="email" type="email" placeholder="john@example.com" value={formState.email} onChange={handleChange} required
-                        className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-0 focus-visible:border-[var(--cute-highlight)]" />
+                        className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-2 focus-visible:ring-[var(--cute-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-bg)] focus-visible:border-[var(--cute-text)]" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="subject" className="pixel-text">Subject</Label>
                     <Input id="subject" name="subject" placeholder="Project Inquiry" value={formState.subject} onChange={handleChange} required
-                      className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-0 focus-visible:border-[var(--cute-highlight)]" />
+                      className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-2 focus-visible:ring-[var(--cute-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-bg)] focus-visible:border-[var(--cute-text)]" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="message" className="pixel-text">Message</Label>
                     <Textarea id="message" name="message" placeholder="Tell me about your project or inquiry..." rows={5}
                       value={formState.message} onChange={handleChange} required
-                      className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-0 focus-visible:border-[var(--cute-highlight)]" />
+                      className="rounded-none border-2 border-[var(--cute-text)] bg-[var(--card-bg)] focus-visible:ring-2 focus-visible:ring-[var(--cute-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-bg)] focus-visible:border-[var(--cute-text)]" />
                   </div>
-                  <Button type="submit" className="w-full rounded-none border-2 border-[var(--cute-text)] bg-[var(--cute-text)] text-white hover:bg-[var(--cute-text)]/90"
+                  <Button type="submit" className="w-full border-2 border-[var(--cute-text)] rounded-none bg-[var(--cute-text)] text-[var(--cute-on-text)] hover:bg-[var(--cute-text)]/90"
                     disabled={isSubmitting} onClick={playClickSound}>
-                    {isSubmitting ? (<><span className="animate-spin mr-2">⏳</span>Sending...</>) : (<><Send className="mr-2 h-4 w-4" /> Send Message</>)}
+                    {isSubmitting ? (<><Loader2 className="animate-spin mr-2 h-4 w-4" aria-hidden="true" />Sending...</>) : (<><Send className="mr-2 h-4 w-4" /> Send Message</>)}
                   </Button>
                 </form>
               )}
@@ -177,8 +181,8 @@ export default function Contact({ windowWidth }: { windowWidth?: number }) {
 
       <AnimatedContent distance={0} className="mt-8 rounded-none overflow-hidden h-64 border-2 border-[var(--cute-text)]">
         <iframe
-          title="Map"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d100939.98555098464!2d-122.50764017948551!3d37.75781499657633!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80859a6d00690021%3A0x4a501367f076adff!2sSan%20Francisco%2C%20CA!5e0!3m2!1sen!2sus!4v1652813309840!5m2!1sen!2sus"
+          title={`Map of ${PROFILE.location}`}
+          src={`https://www.google.com/maps?q=${encodeURIComponent(PROFILE.location)}&output=embed`}
           width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
         />
       </AnimatedContent>

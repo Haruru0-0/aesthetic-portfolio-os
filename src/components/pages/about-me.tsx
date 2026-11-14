@@ -9,7 +9,8 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel"
-import Autoplay from "embla-carousel-autoplay"
+import { createAutoplay } from "@/lib/autoplay"
+import { PROFILE, INTERESTS } from "@/data/profile"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -21,6 +22,7 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useContext(ScrollContainerContext)
   const [testimonialApi, setTestimonialApi] = useState<CarouselApi | null>(null)
+  const [autoplayPlugins] = useState(() => createAutoplay())
 
   useEffect(() => {
     if (!testimonialApi) return
@@ -46,6 +48,7 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
     return () => ios.forEach(io => io.disconnect())
   }, { scope: containerRef, dependencies: [] })
 
+  // TODO: these are placeholder testimonials. Replace with real quotes before relying on them.
   const testimonials = [
     {
       name: "Sarah Johnson",
@@ -79,13 +82,6 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
     },
   ]
 
-  const hobbies = [
-    { name: "Coding",       icon: "💻", description: "Building side projects and learning new technologies" },
-    { name: "Photography",  icon: "📷", description: "Capturing urban landscapes and nature" },
-    { name: "Gaming",       icon: "🎮", description: "Strategy and indie games" },
-    { name: "Reading",      icon: "📚", description: "Tech books and science fiction" },
-  ]
-
   const badges = ["Web Development", "Web Design", "React", "Node.js", "UI/UX"]
 
   return (
@@ -93,12 +89,12 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
       <div className="text-center">
         <AnimatedContent scale={0.82} ease="back.out(1.7)" className="inline-block">
           <Avatar className="w-24 h-24 mx-auto mb-4 border-2 border-[var(--cute-text)] rounded-none">
-            <AvatarImage src="/profile-photo.jpg" alt="Profile" />
+            <AvatarImage src={PROFILE.photo} alt={`Portrait of ${PROFILE.name}`} />
             <AvatarFallback className="rounded-none bg-[var(--cute-highlight)] text-[var(--cute-text)]">AK</AvatarFallback>
           </Avatar>
         </AnimatedContent>
         <h1 data-anim="text" className="text-3xl font-bold mb-2 pixel-title">Ahmad Kanaan</h1>
-        <p data-anim="fade" className="mb-4 opacity-80">Full-Stack Developer with 4 years of experience</p>
+        <p data-anim="fade" className="mb-4 opacity-80">{PROFILE.role} with {PROFILE.years} of experience</p>
         <div className="flex flex-wrap justify-center gap-2">
           {badges.map((tag, i) => (
             <AnimatedContent key={tag} delay={i * 0.07} distance={18} scale={0.78} ease="back.out(1.7)">
@@ -109,9 +105,9 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
       </div>
 
       <div>
-        <h2 data-anim="text" className="text-2xl font-bold mb-4 pixel-title border-b-2 border-[var(--cute-text)] inline-block">About Me</h2>
+        <h2 data-anim="text" className="portfolio-section-title pixel-title">About Me</h2>
         <p data-anim="fade" className="mb-4 leading-relaxed">
-          I'm a passionate full-stack developer with 4 years of experience building modern web applications. I specialize
+          I'm a passionate full-stack developer with {PROFILE.years} of experience building modern web applications. I specialize
           in creating responsive, user-friendly interfaces with React and building robust backend systems with Node.js. My
           approach combines technical expertise with creative problem-solving to deliver exceptional digital experiences.
         </p>
@@ -122,11 +118,11 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
       </div>
 
       <div>
-        <h2 data-anim="text" className="text-2xl font-bold mb-4 pixel-title border-b-2 border-[var(--cute-text)] inline-block">Testimonials</h2>
+        <h2 data-anim="text" className="portfolio-section-title pixel-title">Testimonials</h2>
         <AnimatedContent scale={0.82} ease="back.out(1.7)">
           <Carousel
             setApi={setTestimonialApi}
-            plugins={[Autoplay({ delay: 2000 })]}
+            plugins={autoplayPlugins}
             opts={{ align: "start", loop: true }}
           >
             <div className="flex items-center gap-2">
@@ -147,8 +143,8 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
                     }
                   >
                     <div className="p-1 h-full">
-                      <Card className="h-full pixel-card">
-                        <CardContent className="pt-6 flex-grow flex flex-col">
+                      <Card className="pixel-card border-0 gap-3 py-4 h-full">
+                        <CardContent className="flex-grow flex flex-col">
                           <div className="flex items-start gap-4 mb-4">
                             <Avatar className="shrink-0 border-2 border-[var(--cute-text)] rounded-none w-10 h-10">
                               <AvatarImage src={testimonial.avatar || "/placeholder.svg"} alt={testimonial.name} />
@@ -185,17 +181,16 @@ export default function AboutMe({ windowWidth }: { windowWidth?: number }) {
       </div>
 
       <div>
-        <h2 data-anim="text" className="text-2xl font-bold mb-4 pixel-title border-b-2 border-[var(--cute-text)] inline-block">
+        <h2 data-anim="text" className="portfolio-section-title pixel-title">
           Hobbies & Interests
         </h2>
-        <div className="grid gap-4 mt-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))" }}>
-          {hobbies.map((hobby, index) => (
+        <div className="grid gap-4 mt-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+          {INTERESTS.map((hobby, index) => (
             <AnimatedContent key={index} delay={index * 0.07} distance={18} scale={0.78} ease="back.out(1.7)">
-              <Card className="h-full pixel-card hover:shadow-md transition-shadow">
-                <CardContent className="pt-6 text-center">
-                  <div className="text-4xl mb-2">{hobby.icon}</div>
-                  <h3 className="font-bold mb-1 pixel-text">{hobby.name}</h3>
-                  <p className="text-sm opacity-70">{hobby.description}</p>
+              <Card className="pixel-card border-0 gap-3 py-4 h-full">
+                <CardContent className="text-center">
+                  <div className="text-4xl mb-2" aria-hidden="true">{hobby.icon}</div>
+                  <h3 className="font-bold pixel-text">{hobby.name}</h3>
                 </CardContent>
               </Card>
             </AnimatedContent>

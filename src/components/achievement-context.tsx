@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 import { gsap } from 'gsap'
-import HappyCat from '@/assets/happy-cat.gif'
+import HappyCat from '@/assets/mascots/happy-cat.webp'
+import { GlassPanel } from '@/components/GlassPanel'
 
 export type AchievementId =
   | 'first_window' | 'about_me' | 'resume' | 'projects' | 'blog' | 'links' | 'contact'
@@ -35,7 +35,18 @@ export const ACHIEVEMENTS: Achievement[] = [
 
 // ── Desktop toast (liquid glass, slides from right) ─────────────────────────
 
-function DesktopToastContent({ toastId, achievement }: { toastId: string | number, achievement: Achievement }) {
+type NotificationProps = { achievement: Achievement; pending: number; onDone: () => void }
+
+function QueueControls({ pending, onDone }: Pick<NotificationProps, "pending" | "onDone">) {
+  return pending > 0 ? (
+    <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-200">
+      <span>{pending} more waiting</span>
+      <button type="button" aria-label="Next achievement" onClick={onDone} className="cursor-pointer rounded-full bg-white/10 px-3 py-1 font-semibold text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200">Next</button>
+    </div>
+  ) : null
+}
+
+function DesktopToastContent({ achievement, pending, onDone }: NotificationProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -48,39 +59,39 @@ function DesktopToastContent({ toastId, achievement }: { toastId: string | numbe
     )
 
     const timer = setTimeout(() => {
-      if (!ref.current) { toast.dismiss(toastId); return }
+      if (!ref.current) { onDone(); return }
       gsap.to(ref.current, {
         x: 140, opacity: 0, scale: 0.88,
         duration: 0.4, ease: 'back.in(1.7)',
-        onComplete: () => { toast.dismiss(toastId) },
+        onComplete: onDone,
       })
-    }, 3500)
+    }, 5000)
 
-    return () => clearTimeout(timer)
-  }, [toastId])
+    return () => { clearTimeout(timer); gsap.killTweensOf(el) }
+  }, [onDone])
 
   return (
-    <div ref={ref} className="w-72" style={{ willChange: 'transform, opacity' }}>
-      <div className="liquidGlass-wrapper" style={{ borderRadius: '1rem' }}>
-        <div className="liquidGlass-effect" style={{ borderRadius: '1rem' }} />
-        <div className="liquidGlass-tint" style={{ borderRadius: '1rem' }} />
-        <div className="liquidGlass-shine" style={{ borderRadius: '1rem' }} />
-        <div className="liquidGlass-content p-3 flex items-center gap-3">
-          <img src={HappyCat} alt="happy cat" className="w-12 h-12 rounded-xl flex-shrink-0 object-cover" />
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-[#74defc] uppercase tracking-widest mb-0.5">✨ Achievement Unlocked!</p>
-            <p className="font-bold text-sm text-white leading-tight">{achievement.name}</p>
-            <p className="text-xs text-white/70 leading-snug line-clamp-2">{achievement.description}</p>
+    // No will-change here: it makes this wrapper a "backdrop root", so the glass inside
+    // could not see the wallpaper or windows behind the toast.
+    <div ref={ref} role="status" aria-live="polite" aria-atomic="true" className="group fixed right-4 top-[max(60px,env(safe-area-inset-top))] z-[99999] w-80 max-w-[calc(100vw-2rem)]">
+      <GlassPanel radius="1rem" contentClassName="flex items-center gap-3 p-3 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] group-hover:p-4 motion-reduce:transition-none [text-shadow:0_1px_3px_rgba(0,15,50,0.9)]">
+        <div className="contents">
+          <img src={HappyCat} alt="" className="w-12 h-12 rounded-xl flex-shrink-0 object-cover" />
+          <div className="min-w-0 flex-1">
+            <p className="mb-1 text-xs font-medium leading-tight text-sky-200">Achievement unlocked</p>
+            <p className="mb-1 font-bold text-base text-white leading-tight">{achievement.name}</p>
+            <p className="text-xs text-slate-100 leading-snug line-clamp-2">{achievement.description}</p>
+            <QueueControls pending={pending} onDone={onDone} />
           </div>
         </div>
-      </div>
+      </GlassPanel>
     </div>
   )
 }
 
 // ── Mobile toast (Dynamic Island pill, fixed-centered at top) ────────────────
 
-function MobileDynamicToast({ achievement, onDone }: { achievement: Achievement, onDone: () => void }) {
+function MobileDynamicToast({ achievement, pending, onDone }: NotificationProps) {
   const pillRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -95,7 +106,7 @@ function MobileDynamicToast({ achievement, onDone }: { achievement: Achievement,
     gsap.set(content, { opacity: 0 })
 
     const tl = gsap.timeline()
-    tl.to(pill, { width: expandedWidth, height: 78, borderRadius: 22, duration: 0.55, ease: 'back.out(1.7)' })
+    tl.to(pill, { width: expandedWidth, height: 144, borderRadius: 22, duration: 0.55, ease: 'back.out(1.7)' })
       .to(content, { opacity: 1, duration: 0.25, ease: 'power2.out' }, '-=0.1')
 
     const timer = setTimeout(() => {
@@ -103,40 +114,44 @@ function MobileDynamicToast({ achievement, onDone }: { achievement: Achievement,
         .to(content, { opacity: 0, duration: 0.2 })
         .to(pill, { width: 110, height: 34, borderRadius: 100, duration: 0.4, ease: 'back.in(1.7)' })
         .to(pill, { y: -60, opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: onDone })
-    }, 3500)
+    }, 5000)
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => { clearTimeout(timer); tl.kill(); gsap.killTweensOf([pill, content]) }
+  }, [onDone])
 
   const expandedWidth = Math.min(300, window.innerWidth - 32)
 
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
       style={{
         position: 'fixed',
-        top: 12,
+        top: 'max(12px, env(safe-area-inset-top))',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 99999,
         display: 'flex',
         justifyContent: 'center',
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
       }}
     >
       <div
         ref={pillRef}
         className="liquidGlass-wrapper"
-        style={{ willChange: 'width, height, border-radius, opacity, transform' }}
+        style={{ willChange: 'width, height, border-radius, transform' }}
       >
         <div className="liquidGlass-effect" style={{ borderRadius: 'inherit' }} />
         <div className="liquidGlass-tint" style={{ borderRadius: 'inherit' }} />
         <div className="liquidGlass-shine" style={{ borderRadius: 'inherit' }} />
-        <div ref={contentRef} className="liquidGlass-content flex items-center gap-3 px-4" style={{ width: expandedWidth, minHeight: 78 }}>
-          <span className="text-2xl flex-shrink-0">{achievement.icon}</span>
-          <div className="min-w-0">
-            <p className="text-[9px] font-bold text-[#74defc] uppercase tracking-widest mb-0.5">✨ Achievement Unlocked!</p>
-            <p className="font-bold text-sm text-white leading-tight">{achievement.name}</p>
-            <p className="text-[11px] text-white/60 leading-snug line-clamp-1">{achievement.description}</p>
+        <div ref={contentRef} className="liquidGlass-content flex items-center gap-3 rounded-[inherit] bg-[rgba(30,110,200,0.24)] px-3 py-3 [text-shadow:0_1px_3px_rgba(0,15,50,0.9)]" style={{ width: expandedWidth, minHeight: 144 }}>
+          <img src={HappyCat} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover" />
+          <div className="min-w-0 flex-1">
+            <p className="mb-1 text-xs font-medium leading-tight text-sky-200">Achievement unlocked</p>
+            <p className="mb-1 font-bold text-base text-white leading-tight">{achievement.name}</p>
+            <p className="text-xs text-slate-100 leading-snug line-clamp-2">{achievement.description}</p>
+            <QueueControls pending={pending} onDone={onDone} />
           </div>
         </div>
       </div>
@@ -155,6 +170,12 @@ type AchievementContextType = {
 }
 
 const AchievementContext = createContext<AchievementContextType | undefined>(undefined)
+const AchievementNotificationContext = createContext<React.ReactNode>(null)
+
+// Render inside WallpaperContext so GlassPanel receives the live backdrop image.
+export function AchievementNotifications() {
+  return useContext(AchievementNotificationContext)
+}
 
 export function AchievementProvider({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState<Set<AchievementId>>(() => {
@@ -166,7 +187,8 @@ export function AchievementProvider({ children }: { children: React.ReactNode })
     }
   })
 
-  const [mobileQueue, setMobileQueue] = useState<Achievement[]>([])
+  const [notificationQueue, setNotificationQueue] = useState<Array<{ achievement: Achievement; mobile: boolean }>>([])
+  const finishNotification = useCallback(() => setNotificationQueue(queue => queue.slice(1)), [])
   const prevUnlockedRef = useRef<Set<AchievementId>>(new Set(unlocked))
 
   const unlock = useCallback((id: AchievementId) => {
@@ -181,32 +203,26 @@ export function AchievementProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const newlyUnlocked = [...unlocked].filter(id => !prevUnlockedRef.current.has(id))
-    newlyUnlocked.forEach(id => {
-      const a = ACHIEVEMENTS.find(x => x.id === id)
-      if (!a) return
-      if (window.innerWidth < 650) {
-        setMobileQueue(q => [...q, a])
-      } else {
-        toast.custom(toastId => (
-          <DesktopToastContent toastId={toastId} achievement={a} />
-        ), { duration: Infinity })
-      }
+    const added = newlyUnlocked.flatMap(id => {
+      const achievement = ACHIEVEMENTS.find(item => item.id === id)
+      return achievement ? [{ achievement, mobile: window.innerWidth < 650 }] : []
     })
+    if (added.length) setNotificationQueue(queue => [...queue, ...added])
     prevUnlockedRef.current = new Set(unlocked)
   }, [unlocked])
 
-  const current = mobileQueue[0]
+  const current = notificationQueue[0]
+  const pending = notificationQueue.length - 1
 
   return (
     <AchievementContext.Provider value={{ achievements: ACHIEVEMENTS, unlocked, unlock }}>
-      {children}
-      {current && (
-        <MobileDynamicToast
-          key={current.id}
-          achievement={current}
-          onDone={() => setMobileQueue(q => q.slice(1))}
-        />
-      )}
+      <AchievementNotificationContext.Provider value={current && (current.mobile ? (
+        <MobileDynamicToast key={current.achievement.id} achievement={current.achievement} pending={pending} onDone={finishNotification} />
+      ) : (
+        <DesktopToastContent key={current.achievement.id} achievement={current.achievement} pending={pending} onDone={finishNotification} />
+      ))}>
+        {children}
+      </AchievementNotificationContext.Provider>
     </AchievementContext.Provider>
   )
 }

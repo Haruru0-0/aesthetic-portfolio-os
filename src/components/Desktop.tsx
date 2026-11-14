@@ -16,28 +16,31 @@ import { DesktopIcon } from "./Icon";
 import { MobileIcon } from "./MobileIcon";
 import { Taskbar } from "./Taskbar";
 import MenuBar from "./MenuBar";
+import { CommandMenu } from "./CommandMenu";
+import { DesktopContextMenu } from "./DesktopContextMenu";
+import { GlassPanel } from "./GlassPanel";
+import { WallpaperContext, WallpaperChoiceContext } from "./wallpaper-context";
 import MusicPlayerWidget from "./MusicPlayerWidget";
 import { Toaster } from "@/components/ui/sonner";
-import Wallpaper from "../assets/wallpaper.jpg";
-import MobileWallpaper from "../assets/MobileWallpaper.jpg";
-import Project from "../assets/project.png";
-import LinkIcon from "../assets/Links.png";
-import Phone from "../assets/phone.png";
-import BlogIcon from "../assets/Blog.png";
-import About from "../assets/about.png";
-import ResumeIcon from "../assets/resume.png";
-import JellyfishIcon from "../assets/jellyfish.png";
-import TerminalIcon from "../assets/terminal.png";
-import GreetingGif from "../assets/greeting.gif";
-import WaterCd from "../assets/water-cd.jpg";
-import CutePuppy from "../assets/cute-puppy.jpg";
+import { useWallpaperSelection } from "@/lib/use-wallpaper-selection";
+import Project from "../assets/app-icons/project.webp";
+import LinkIcon from "../assets/app-icons/Links.webp";
+import Phone from "../assets/app-icons/phone.webp";
+import BlogIcon from "../assets/app-icons/Blog.webp";
+import About from "../assets/app-icons/about.webp";
+import ResumeIcon from "../assets/app-icons/resume.webp";
+import JellyfishIcon from "../assets/app-icons/jellyfish.webp";
+import TerminalIcon from "../assets/app-icons/terminal.webp";
+import GreetingGif from "../assets/mascots/greeting.webp";
+import WaterCd from "../assets/mobile-widgets/water-cd.webp";
+import CutePuppy from "../assets/mobile-widgets/cute-puppy.webp";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { AudioProvider } from "./audio-context";
 import { SoundProvider } from "./sound-context";
-import { MobileSettingsBar } from "./MobileSettingsBar";
-import { AchievementProvider, useAchievements, type AchievementId } from "./achievement-context";
+import { MobileControlTiles } from "./MobileControlTiles";
+import { AchievementProvider, AchievementNotifications, useAchievements, type AchievementId } from "./achievement-context";
 
 const AboutMe = React.lazy(() => import("./pages/about-me"));
 const Resume = React.lazy(() => import("./pages/resume"));
@@ -74,6 +77,15 @@ function DesktopInner() {
   const floatingAnims = useRef<gsap.core.Tween[]>([]);
 
   const pageOverlayRef = useRef<HTMLDivElement>(null);
+  const wallpaperRef = useRef<HTMLImageElement>(null);
+  const mobileWallpaperRef = useRef<HTMLImageElement>(null);
+
+  const desktopHome = useWallpaperSelection("desktop");
+  const mobileHome = useWallpaperSelection("mobile");
+  const desktopLock = useWallpaperSelection("desktop-lock");
+  const mobileLock = useWallpaperSelection("mobile-lock");
+  const currentWallpaper = desktopHome.current;
+  const currentMobileWallpaper = mobileHome.current;
 
   useEffect(() => {
     const el = pageOverlayRef.current;
@@ -90,9 +102,18 @@ function DesktopInner() {
   const { unlock, unlocked } = useAchievements();
   const openedAppsRef = useRef<Set<string>>(new Set());
   const initialUnlockedRef = useRef(unlocked);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [folderPage, setFolderPage] = useState(0);
   const [folderDragOffset, setFolderDragOffset] = useState(0);
   const touchStartX = useRef(0);
+
+  // First-run cue: shown until the visitor opens any window (persisted via the first_window achievement).
+  const [cueReady, setCueReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setCueReady(true), 1800);
+    return () => clearTimeout(t);
+  }, []);
+  const showCue = cueReady && !unlocked.has('first_window');
 
   const CORE_APPS = ['About me', 'Resume', 'Projects', 'Blog', 'Links', 'Contact me'];
 
@@ -140,6 +161,8 @@ function DesktopInner() {
     { id: "achievements", label: "Achievements", icon: JellyfishIcon },
     { id: "terminal", label: "Terminal", icon: TerminalIcon },
   ]);
+
+  const initialAppsRef = useRef(desktopApps);
 
   // 50px icon + 8px gap = 58px/slot; ~20px dock padding + 8px safe margin = 28px overhead
   const maxFit   = Math.floor((viewportW - 28) / 58);
@@ -399,6 +422,9 @@ function DesktopInner() {
   );
 
   return (
+        <WallpaperChoiceContext.Provider value={isDesktop ? { ...desktopHome, lock: desktopLock } : { ...mobileHome, lock: mobileLock }}>
+    <WallpaperContext.Provider value={isDesktop ? wallpaperRef : mobileWallpaperRef}>
+    <AchievementNotifications />
     <SoundProvider>
       <AudioProvider>
         <DndContext
@@ -407,18 +433,42 @@ function DesktopInner() {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
+          <DesktopContextMenu
+            enabled={isDesktop}
+            apps={desktopApps}
+            onOpenApp={handleAppClick}
+            onOpenPalette={() => setPaletteOpen(true)}
+            onSortApps={() => setDesktopApps((apps) => [...apps].sort((a, b) => a.label.localeCompare(b.label)))}
+            onResetApps={() => setDesktopApps(initialAppsRef.current)}
+          >
           <div className="w-screen h-screen overflow-hidden relative" onClick={() => setSelectedAppId(null)}>
-            <div className="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
-              style={{ backgroundImage: `url(${Wallpaper})`, opacity: isDesktop ? 1 : 0 }} />
-            <div className="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
-              style={{ backgroundImage: `url(${MobileWallpaper})`, opacity: isDesktop ? 0 : 1 }} />
+            <img
+              key={currentWallpaper?.id}
+              ref={wallpaperRef}
+              src={currentWallpaper?.src}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
+              style={{ opacity: isDesktop ? 1 : 0 }}
+            />
+            <img
+              key={currentMobileWallpaper?.id}
+              ref={mobileWallpaperRef}
+              src={currentMobileWallpaper?.src}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
+              style={{ opacity: isDesktop ? 0 : 1 }}
+            />
             {/* Page transition overlay — fades out on mount */}
             <div
               ref={pageOverlayRef}
               className="fixed inset-0 bg-black z-[99999] pointer-events-none"
             />
 
-            {isDesktop && <MenuBar />}
+            {isDesktop && <MenuBar onOpenPalette={() => setPaletteOpen(true)} />}
 
             {isDesktop && (
               <div className="absolute top-9 left-1/2 -translate-x-1/2 text-center pointer-events-none">
@@ -439,6 +489,13 @@ function DesktopInner() {
                   >
                     {greeting}!
                   </h1>
+                  <p
+                    aria-live="polite"
+                    className="mt-1 whitespace-nowrap text-sm text-white/90 drop-shadow-md transition-opacity duration-700"
+                    style={{ opacity: showCue ? 1 : 0 }}
+                  >
+                    {showCue ? "Double-click an icon to open it" : ""}
+                  </p>
                 </div>
               </div>
             )}
@@ -488,11 +545,11 @@ function DesktopInner() {
                   {/* Top row: 2-page folder + water CD */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* Folder */}
-                    <div className="liquidGlass-wrapper mobile-folder rounded-2xl">
-                      <div className="liquidGlass-effect"></div>
-                      <div className="liquidGlass-tint"></div>
-                      <div className="liquidGlass-shine"></div>
-                      <div className="liquidGlass-content flex flex-col overflow-hidden flex-1">
+                    <GlassPanel
+                      radius="1rem"
+                      contentClassName="flex h-[195px] flex-col overflow-hidden p-0 transition-[height] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] hover:h-[204px]"
+                    >
+                      <div className="flex flex-1 flex-col overflow-hidden">
                         {/* Sliding pages */}
                         <div
                           className="flex flex-1 overflow-hidden"
@@ -538,12 +595,12 @@ function DesktopInner() {
                                 </div>
                               ))}
                             </div>
-                            {/* Page 2: apps 6–7 (Achievements + Terminal) */}
+                            {/* Page 2: apps 4–7 (Links, Contact, Achievements, Terminal) */}
                             <div className="grid grid-cols-2 gap-1 auto-rows-min justify-items-center p-2 flex-shrink-0 w-full content-start">
-                              {desktopApps.slice(6).map((app, index) => (
+                              {desktopApps.slice(4).map((app, index) => (
                                 <div
                                   key={app.id}
-                                  ref={(el) => { if (el) mobileIconsRef.current[index + 6] = el; }}
+                                  ref={(el) => { if (el) mobileIconsRef.current[index + 4] = el; }}
                                 >
                                   <MobileIcon
                                     id={app.id}
@@ -562,14 +619,16 @@ function DesktopInner() {
                             <button
                               key={i}
                               onClick={() => setFolderPage(i)}
-                              className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                              aria-label={`Page ${i + 1}`}
+                              aria-current={folderPage === i}
+                              className={`cursor-pointer w-1.5 h-1.5 rounded-full transition-all duration-200 ${
                                 folderPage === i ? 'bg-white' : 'bg-white/35'
                               }`}
                             />
                           ))}
                         </div>
                       </div>
-                    </div>
+                    </GlassPanel>
 
                     {/* Water CD */}
                     <div className="flex justify-center">
@@ -584,7 +643,7 @@ function DesktopInner() {
                     </div>
                   </div>
 
-                  {/* Bottom row: puppy + apps 4–5 + settings */}
+                  {/* Bottom row: puppy + control tiles */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex justify-center">
                       <div className="relative overflow-hidden rounded-2xl h-[160px]">
@@ -596,24 +655,7 @@ function DesktopInner() {
                         <div className="widget-glass-overlay rounded-2xl" />
                       </div>
                     </div>
-                    <div className="flex flex-col justify-center gap-3">
-                      <div className="grid grid-cols-2 gap-2 auto-rows-min justify-items-center">
-                        {desktopApps.slice(4, 6).map((app, index) => (
-                          <div
-                            key={app.id}
-                            ref={(el) => { if (el) mobileIconsRef.current[index + 4] = el; }}
-                          >
-                            <MobileIcon
-                              id={app.id}
-                              label={app.label}
-                              icon={app.icon}
-                              onClick={() => openWindow(app.label)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <MobileSettingsBar />
-                    </div>
+                    <MobileControlTiles onOpenPalette={() => setPaletteOpen(true)} />
                   </div>
 
                   <MusicPlayerWidget isDesktop={false} />
@@ -641,8 +683,16 @@ function DesktopInner() {
               </AppWindow>
             ))}
 
-            <Toaster position={isDesktop ? "top-right" : "top-center"} />
+            <CommandMenu
+              open={paletteOpen}
+              onOpenChange={setPaletteOpen}
+              apps={desktopApps}
+              onOpenApp={handleAppClick}
+            />
+
+            <Toaster position={isDesktop ? "top-right" : "top-center"} offset={isDesktop ? { top: 60, right: 16 } : undefined} />
           </div>
+          </DesktopContextMenu>
 
           <DragOverlay dropAnimation={{ duration: 180, easing: "ease" }}>
             {activeAppId ? (() => {
@@ -670,5 +720,7 @@ function DesktopInner() {
         </DndContext>
       </AudioProvider>
     </SoundProvider>
+    </WallpaperContext.Provider>
+    </WallpaperChoiceContext.Provider>
   );
 }

@@ -3,7 +3,8 @@
 import type React from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
-import { useRef } from "react"
+import { createContext, forwardRef, useCallback, useContext, useRef, useState } from "react"
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "motion/react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   DropdownMenu,
@@ -11,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAppSound } from "./sound-context"
+import { GlassPanel } from "@/components/GlassPanel"
 
 interface AppItem {
   id: string
@@ -30,9 +32,50 @@ interface TaskbarProps {
   className?: string
 }
 
+// macOS-style dock magnification: each icon's size follows the cursor's distance along the dock,
+// smoothed with a spring. The dock widens because the icons take real layout space.
+const DOCK_BASE = 50
+const DOCK_MAX = 84
+const DOCK_RANGE = 150
+
+const DockMouseContext = createContext<MotionValue<number> | null>(null)
+
+const DockButton = forwardRef<HTMLButtonElement, React.ComponentProps<typeof motion.button>>(function DockButton(
+  { style, ...props },
+  forwardedRef
+) {
+  const mouseX = useContext(DockMouseContext)
+  const idle = useMotionValue(Infinity)
+  const nodeRef = useRef<HTMLButtonElement | null>(null)
+  const setRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      nodeRef.current = node
+      if (typeof forwardedRef === "function") forwardedRef(node)
+      else if (forwardedRef) forwardedRef.current = node
+    },
+    [forwardedRef]
+  )
+  const distance = useTransform(mouseX ?? idle, (x) => {
+    const box = nodeRef.current?.getBoundingClientRect()
+    return box ? x - box.x - box.width / 2 : Infinity
+  })
+  const raw = useTransform(distance, [-DOCK_RANGE, 0, DOCK_RANGE], [DOCK_BASE, DOCK_MAX, DOCK_BASE])
+  const size = useSpring(raw, { mass: 0.1, stiffness: 150, damping: 12 })
+
+  return <motion.button ref={setRef} style={{ ...style, width: size, height: size }} {...props} />
+})
+
 export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className = "" }: TaskbarProps) {
   const { playClickSound, playHoverSound, playMenuSound } = useAppSound()
   const taskbarRef = useRef<HTMLDivElement>(null)
+  const mouseX = useMotionValue(Infinity)
+  // Mouse and trackpad only, and not when the visitor asks for reduced motion.
+  const [magnify] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
 
   const handleAppClick = (label: string) => {
     playClickSound()
@@ -55,12 +98,13 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
       className={`fixed bottom-2 left-1/2 -translate-x-1/2 z-[60] ${className}`}
       style={{ width: "auto" }}
     >
-      <div className="liquidGlass-wrapper">
-        <div className="liquidGlass-effect"></div>
-        <div className="liquidGlass-tint"></div>
-        <div className="liquidGlass-shine"></div>
-        <div className="liquidGlass-content">
-          <div className="dock">
+      <GlassPanel radius="2rem" width="max-content" className="dock-glass" contentClassName="p-0">
+          <DockMouseContext.Provider value={magnify ? mouseX : null}>
+          <motion.div
+            className={magnify ? "dock dock-magnify" : "dock"}
+            onMouseMove={magnify ? (e) => mouseX.set(e.clientX) : undefined}
+            onMouseLeave={magnify ? () => mouseX.set(Infinity) : undefined}
+          >
             <TooltipProvider>
               {apps.map((app) => {
                 const win = openWindows.find((w) => w.name === app.label)
@@ -70,7 +114,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                 return (
                   <Tooltip key={app.id}>
                     <TooltipTrigger asChild>
-                      <button
+                      <DockButton
                         className="dock-icon group relative"
                         onClick={() => handleAppClick(app.label)}
                         onMouseEnter={() => playHoverSound()}
@@ -79,7 +123,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                         {isRunning && (
                           <div className={`absolute -bottom-2 w-1.5 h-1.5 rounded-full bg-white shadow-sm ${isMinimized ? 'opacity-50' : 'opacity-100'}`} />
                         )}
-                      </button>
+                      </DockButton>
                     </TooltipTrigger>
                     <TooltipContent side="top" sideOffset={8} className="taskbar-tooltip bg-sky-400/30 backdrop-blur-md text-black border-none shadow-lg rounded-lg" arrowClassName="bg-transparent fill-transparent">
                       <p>{app.label}</p>
@@ -94,7 +138,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuTrigger asChild>
-                        <button
+                        <DockButton
                           className="dock-icon group relative"
                           onClick={() => playMenuSound()}
                           onMouseEnter={() => playHoverSound()}
@@ -104,7 +148,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                               ···
                             </span>
                           </div>
-                        </button>
+                        </DockButton>
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
                     <TooltipContent side="top" sideOffset={8} className="taskbar-tooltip bg-sky-400/30 backdrop-blur-md text-black border-none shadow-lg rounded-lg" arrowClassName="bg-transparent fill-transparent">
@@ -118,14 +162,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                     align="center"
                     className="!bg-transparent !border-none !p-0 !shadow-none !min-w-0 !overflow-visible"
                   >
-                    <div
-                      className="liquidGlass-wrapper"
-                      style={{ borderRadius: "1.25rem" }}
-                    >
-                      <div className="liquidGlass-effect" style={{ borderRadius: "1.25rem" }} />
-                      <div className="liquidGlass-tint" style={{ borderRadius: "1.25rem" }} />
-                      <div className="liquidGlass-shine" style={{ borderRadius: "1.25rem" }} />
-                      <div className="liquidGlass-content">
+                    <GlassPanel radius="1.25rem" width="max-content" contentClassName="p-0">
                         <div className="flex flex-col items-center gap-1 p-2">
                           {overflowApps.map((app) => {
                             const win = openWindows.find((w) => w.name === app.label)
@@ -152,15 +189,14 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                             )
                           })}
                         </div>
-                      </div>
-                    </div>
+                    </GlassPanel>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
             </TooltipProvider>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+          </DockMouseContext.Provider>
+      </GlassPanel>
     </div>
   )
 }

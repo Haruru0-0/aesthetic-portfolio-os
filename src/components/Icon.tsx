@@ -121,6 +121,8 @@ export function DesktopIcon({
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      aria-label={`Open ${label}`}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleDoubleClick(); } }}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={handleMouseEnter}
@@ -144,7 +146,7 @@ export function DesktopIcon({
         >
           <img
             src={icon || "/placeholder.svg"}
-            alt={label}
+            alt=""
             className="max-w-full max-h-full object-contain drop-shadow-md"
             style={{
               willChange: "transform",
