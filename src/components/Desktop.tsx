@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppWindow } from "./Window";
 import { DesktopIcon } from "./Icon";
 import { MobileIcon } from "./MobileIcon";
+import { WallpaperText } from "./WallpaperText";
 import { Taskbar } from "./Taskbar";
 import MenuBar from "./MenuBar";
 import { CommandMenu } from "./CommandMenu";
@@ -487,14 +488,14 @@ function DesktopInner() {
                     ref={greetingTextRef}
                     className="text-2xl font-bold text-white drop-shadow-md"
                   >
-                    {greeting}!
+                    <WallpaperText>{greeting}!</WallpaperText>
                   </h1>
                   <p
                     aria-live="polite"
                     className="mt-1 whitespace-nowrap text-sm text-white/90 drop-shadow-md transition-opacity duration-700"
                     style={{ opacity: showCue ? 1 : 0 }}
                   >
-                    {showCue ? "Double-click an icon to open it" : ""}
+                    <WallpaperText>{showCue ? "Double-click an icon to open it" : ""}</WallpaperText>
                   </p>
                 </div>
               </div>

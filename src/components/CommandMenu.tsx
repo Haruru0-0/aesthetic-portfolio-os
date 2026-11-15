@@ -68,7 +68,7 @@ export function CommandMenu({
       >
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <DialogDescription className="sr-only">Search for an app or action</DialogDescription>
-        <GlassPanel radius="1.25rem" className="border border-white/40" contentClassName="bg-[rgba(12,55,115,0.62)] p-2">
+        <GlassPanel radius="1.25rem" tintColor="rgba(12,55,115,0.62)" contentClassName="p-2 hover:p-3 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
           <Command className="bg-transparent text-slate-100">
             <div className="[&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:border-white/25 [&_[data-slot=command-input-wrapper]_svg]:text-slate-100 [&_[data-slot=command-input-wrapper]_svg]:opacity-80">
               <CommandInput

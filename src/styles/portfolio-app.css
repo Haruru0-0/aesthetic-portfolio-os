@@ -1,0 +1,212 @@
+/* Pixel-blue content system. Desktop glass and terminal retain their own materials. */
+.window-content.portfolio-app {
+  --app-step-shadow: color-mix(in srgb, var(--cute-border) 65%, transparent);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--cute-text);
+  background: var(--cute-bg);
+  padding: 24px;
+  caret-color: var(--cute-text);
+}
+
+.window-content.portfolio-app ::selection {
+  color: var(--cute-on-text);
+  background: var(--cute-text);
+}
+
+.window-content.portfolio-app h1.pixel-title { font-size: 1.875rem; line-height: 1.2; }
+.window-content.portfolio-app .portfolio-section-title { font-size: 1.5rem; line-height: 1.25; }
+
+.window-content.portfolio-app :is(.pixel-card, [data-slot="magic-card"]) {
+  border: 2px solid var(--cute-text);
+  border-radius: 0;
+  color: var(--cute-text);
+  background-color: var(--card-bg);
+  box-shadow: 3px 3px 0 var(--app-step-shadow);
+  transition: box-shadow 180ms steps(3, end);
+}
+
+.window-content.portfolio-app :is(.pixel-card, [data-slot="magic-card"]):hover {
+  transform: none;
+  box-shadow: 3px 3px 0 var(--app-step-shadow);
+}
+
+.window-content.portfolio-app :is([data-slot="card-content"], [data-slot="card-header"], [data-slot="card-footer"]) {
+  padding-inline: 24px;
+}
+
+.window-content.portfolio-app [data-slot="badge"] {
+  border-radius: 0 !important;
+  border: 1px solid var(--cute-border);
+  background: var(--cute-highlight);
+  color: var(--cute-text);
+  box-shadow: none;
+  backdrop-filter: none;
+  font-family: inherit;
+  font-weight: 500;
+  padding: 3px 8px;
+}
+
+.window-content.portfolio-app [data-slot="badge"]:hover { box-shadow: none; background: var(--cute-highlight); }
+
+.window-content.portfolio-app :is([data-slot="input"], [data-slot="textarea"]) {
+  border: 2px solid var(--cute-text);
+  border-radius: 0;
+  background: var(--card-bg);
+  color: var(--cute-text);
+  box-shadow: none;
+  font-family: inherit;
+  font-size: 1rem;
+  min-height: 44px;
+}
+
+.window-content.portfolio-app :is([data-slot="input"], [data-slot="textarea"])::placeholder {
+  color: color-mix(in srgb, var(--cute-text) 70%, var(--card-bg));
+  opacity: 1;
+}
+
+.window-content.portfolio-app :is([data-slot="input"], [data-slot="textarea"]):focus-visible {
+  outline: 2px solid var(--cute-border);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+.window-content.portfolio-app [data-slot="button"] {
+  border-radius: 0;
+  color: var(--cute-text);
+  font-family: inherit;
+}
+
+/* Keep carousel and other compact icon controls at their intended size and position. */
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]) {
+  min-height: 44px;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 2px solid var(--cute-text);
+  background: var(--card-bg);
+  box-shadow: 3px 3px 0 var(--cute-border);
+  font-size: 1.125rem;
+  transition: translate 180ms steps(3, end), box-shadow 180ms steps(3, end);
+}
+
+.window-content.portfolio-app [data-slot="button"][data-variant="default"] {
+  --app-button-fill: color-mix(in srgb, var(--cute-text) 85%, var(--cute-border));
+  background: var(--cute-text);
+  color: var(--cute-on-text);
+}
+
+.window-content.portfolio-app [data-slot="button"][data-variant="secondary"] { background: var(--cute-highlight); }
+
+.window-content.portfolio-app [data-slot="button"][data-variant="destructive"] {
+  background: var(--destructive);
+  color: white;
+  border-color: var(--destructive);
+}
+
+.window-content.portfolio-app [data-slot="button"]:is([data-variant="ghost"], [data-variant="link"]) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.window-content.portfolio-app [data-slot="button"]:is([data-variant="ghost"], [data-variant="link"]):hover {
+  background: var(--cute-highlight);
+}
+
+.window-content.portfolio-app [data-slot="button"]:focus-visible {
+  outline: 2px solid var(--cute-border);
+  outline-offset: 5px;
+}
+
+/* One shared, four-corner pixel layer preserves link/button DOM and accessible names. */
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]):is([data-variant="default"], [data-variant="outline"], [data-variant="secondary"])::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: var(--app-button-fill, var(--cute-highlight));
+  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+  transition: clip-path 240ms steps(5, end);
+}
+
+.window-content.portfolio-app [data-slot="button"]:is(:hover, :focus-visible):not(:disabled, [aria-disabled="true"])::before {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]) > svg {
+  transition: translate 240ms steps(3, end);
+}
+
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]):is(:hover, :focus-visible):not(:disabled, [aria-disabled="true"]) > svg {
+  translate: 4px 0;
+}
+
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]):is([data-variant="default"], [data-variant="outline"], [data-variant="secondary"])::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(var(--cute-text) 0 0) left top / 6px 6px,
+    linear-gradient(var(--cute-text) 0 0) right top / 6px 6px,
+    linear-gradient(var(--cute-text) 0 0) left bottom / 6px 6px,
+    linear-gradient(var(--cute-text) 0 0) right bottom / 6px 6px;
+  background-repeat: no-repeat;
+  transition: inset 240ms steps(4, end), opacity 100ms;
+}
+
+.window-content.portfolio-app [data-slot="button"][data-variant="outline"]:not([data-size^="icon"])::after {
+  inset: -5px;
+  opacity: 1;
+  background:
+    linear-gradient(var(--cute-border) 0 0) left top / 6px 6px,
+    linear-gradient(var(--cute-border) 0 0) right top / 6px 6px,
+    linear-gradient(var(--cute-border) 0 0) left bottom / 6px 6px,
+    linear-gradient(var(--cute-border) 0 0) right bottom / 6px 6px;
+  background-repeat: no-repeat;
+}
+
+@media (hover: hover) {
+  .window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]):is([data-variant="default"], [data-variant="outline"], [data-variant="secondary"]):hover:not(:disabled, [aria-disabled="true"]) {
+    translate: -2px -2px;
+    box-shadow: 5px 5px 0 var(--cute-border);
+  }
+}
+
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]):is([data-variant="default"], [data-variant="secondary"]):is(:hover, :focus-visible):not(:disabled, [aria-disabled="true"])::after {
+  inset: -9px;
+  opacity: 1;
+}
+
+.window-content.portfolio-app [data-slot="button"][data-variant="outline"]:not([data-size^="icon"]):is(:hover, :focus-visible):not(:disabled, [aria-disabled="true"])::after {
+  inset: 0;
+  opacity: 1;
+}
+
+.window-content.portfolio-app [data-slot="button"]:not([data-size^="icon"]):active:not(:disabled, [aria-disabled="true"]) {
+  translate: 3px 3px;
+  box-shadow: none;
+}
+
+.window-content.portfolio-app [data-slot="button"]:is(:disabled, [aria-disabled="true"]) { box-shadow: none; }
+.window-content.portfolio-app [data-slot="button"]:is(:disabled, [aria-disabled="true"])::after { display: none; }
+
+@media (max-width: 640px) {
+  .window-content.portfolio-app { padding: 20px; }
+  .window-content.portfolio-app :is([data-slot="card-content"], [data-slot="card-header"], [data-slot="card-footer"]) { padding-inline: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window-content.portfolio-app [data-slot="button"], .window-content.portfolio-app [data-slot="button"]::after {
+    transition: none;
+    translate: none !important;
+  }
+  .window-content.portfolio-app [data-slot="button"]::after { display: none; }
+  .window-content.portfolio-app [data-slot="button"]::before { transition: none; }
+  .window-content.portfolio-app [data-slot="button"] > svg { transition: none; translate: none !important; }
+}

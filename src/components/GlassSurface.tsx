@@ -49,6 +49,7 @@ type ShapeArt =
   | { src: string; failed: true };
 
 export interface GlassSurfaceProps {
+  tintOverlay?: string;
   children?: ReactNode;
   width?: number | string;
   height?: number | string;
@@ -413,6 +414,7 @@ const GlassSurface = ({
   blur = 11,
   displace = 0,
   backgroundOpacity = 0,
+  tintOverlay,
   saturation = 1,
   distortionScale = -180,
   redOffset = 0,
@@ -1034,6 +1036,7 @@ const GlassSurface = ({
         />
       )}
 
+      {tintOverlay && <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: tintOverlay }} />}
       <div className="relative z-[1] flex h-full w-full items-center justify-center rounded-[inherit] p-2">
         {children}
       </div>

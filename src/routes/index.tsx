@@ -41,6 +41,64 @@ function LoginScreen() {
   const xButtonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const clockGroupRef = useRef<HTMLDivElement>(null);
+  const [darkClockText, setDarkClockText] = useState(false);
+
+  useEffect(() => {
+    const image = isDesktop ? desktopWallpaperRef.current : mobileWallpaperRef.current;
+    const group = clockGroupRef.current;
+    if (!image || !group) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = 48;
+    canvas.height = 32;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+    let frame = 0;
+    const sample = () => {
+      if (!image.complete || !image.naturalWidth) return;
+      const backdrop = image.getBoundingClientRect();
+      const text = group.getBoundingClientRect();
+      if (!backdrop.width || !backdrop.height || !text.width || !text.height) return;
+      // Match object-cover and object-center, including the cropped edges.
+      const scale = Math.max(backdrop.width / image.naturalWidth, backdrop.height / image.naturalHeight);
+      const cropX = (image.naturalWidth * scale - backdrop.width) / 2;
+      const cropY = (image.naturalHeight * scale - backdrop.height) / 2;
+      try {
+        context.drawImage(image,
+          (text.left - backdrop.left + cropX) / scale,
+          (text.top - backdrop.top + cropY) / scale,
+          text.width / scale, text.height / scale,
+          0, 0, canvas.width, canvas.height);
+        const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        const linear = (value: number) => {
+          const channel = value / 255;
+          return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        };
+        let luminance = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          luminance += 0.2126 * linear(pixels[i]) + 0.7152 * linear(pixels[i + 1]) + 0.0722 * linear(pixels[i + 2]);
+        }
+        // Choose the higher-contrast foreground using relative luminance.
+        setDarkClockText(luminance / (pixels.length / 4) > 0.179);
+      } catch {
+        setDarkClockText(false);
+      }
+    };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(sample);
+    };
+    image.addEventListener("load", schedule);
+    const observer = new ResizeObserver(schedule);
+    observer.observe(image);
+    observer.observe(group);
+    schedule();
+    return () => {
+      image.removeEventListener("load", schedule);
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [isDesktop, desktopLock.current?.src, mobileLock.current?.src]);
 
   useEffect(() => {
     router.preloadRoute({ to: "/desktop" });
@@ -137,14 +195,6 @@ function LoginScreen() {
           }
         );
 
-        // Pulsing hint animation
-        gsap.to(hintRef.current, {
-          opacity: 0.5,
-          duration: 2,
-          ease: "power2.inOut",
-          yoyo: true,
-          repeat: -1,
-        });
       }
     }
 
@@ -252,15 +302,15 @@ function LoginScreen() {
         />
         <LockScreenSwitcher choice={isDesktop ? desktopLock : mobileLock} portrait={!isDesktop} hidden={showLogin} />
         {/* Time display */}
-        <div className="flex flex-col items-center">
-          <h1 ref={timeRef} className="text-6xl font-bold text-white mb-2">
+        <div ref={clockGroupRef} data-dark-text={darkClockText} className="lockscreen-clock relative flex flex-col items-center">
+          <h1 ref={timeRef} className="text-6xl font-bold mb-2">
             {formatTime(currentTime)}
           </h1>
-          <p ref={dateRef} className="text-lg text-white/80 mb-6">
+          <p ref={dateRef} className="text-lg mb-6">
             {formatDate(currentTime)}
           </p>
-          <p ref={hintRef} className="text-sm text-white/60">
-            Click anywhere to unlock
+          <p ref={hintRef} className="text-sm">
+            <span className="lockscreen-unlock-hint">Click anywhere to unlock</span>
           </p>
         </div>
 

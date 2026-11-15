@@ -87,12 +87,12 @@ export function DesktopContextMenu({
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className={contentClass}>
-        <GlassPanel radius="1rem" contentClassName="p-1.5">
+        <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
           <ContextMenuLabel className="px-3 py-1.5 text-xs text-slate-200">Desktop</ContextMenuLabel>
           <ContextMenuSub>
             <ContextMenuSubTrigger className={itemClass}>Open app</ContextMenuSubTrigger>
             <ContextMenuSubContent className={contentClass}>
-              <GlassPanel radius="1rem" contentClassName="p-1.5">
+              <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                 {apps.map((app) => (
                   <ContextMenuItem key={app.id} className={itemClass} onSelect={() => onOpenApp(app.label)}>
                     <img src={app.icon} alt="" className="size-5 object-contain" />
@@ -123,7 +123,7 @@ export function DesktopContextMenu({
                 Wallpaper
               </ContextMenuSubTrigger>
               <ContextMenuSubContent className={contentClass}>
-                <GlassPanel radius="1rem" contentClassName="p-1.5">
+                <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                   {wallpaper.wallpapers.length > 1 && (
                     <>
                       <ContextMenuItem className={itemClass} onSelect={wallpaper.next}>
@@ -152,7 +152,7 @@ export function DesktopContextMenu({
                 Lock screen
               </ContextMenuSubTrigger>
               <ContextMenuSubContent className={contentClass}>
-                <GlassPanel radius="1rem" contentClassName="p-1.5">
+                <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                   <ContextMenuRadioGroup value={wallpaper.lock.current?.id} onValueChange={wallpaper.lock.select}>
                     {wallpaper.lock.wallpapers.map((w) => (
                       <GlassRadioItem key={w.id} value={w.id}>
@@ -182,7 +182,7 @@ export function DesktopContextMenu({
               Theme
             </ContextMenuSubTrigger>
             <ContextMenuSubContent className={contentClass}>
-              <GlassPanel radius="1rem" contentClassName="p-1.5">
+              <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                 <ContextMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as "light" | "dark" | "system")}>
                   <GlassRadioItem value="light">
                     <Sun />

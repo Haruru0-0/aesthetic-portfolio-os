@@ -4,6 +4,7 @@ import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
 import { useEffect, useRef } from "react"
 import { useAppSound } from "./sound-context"
+import { WallpaperText } from "./WallpaperText"
 
 export function DesktopIcon({
   id,
@@ -158,7 +159,7 @@ export function DesktopIcon({
           ref={textRef}
           className={`desktop-icon-text${isSelected ? " desktop-icon-text-selected" : ""}`}
         >
-          {label}
+          <WallpaperText positionKey={CSS.Transform.toString(transform)}>{label}</WallpaperText>
         </span>
       </div>
     </div>

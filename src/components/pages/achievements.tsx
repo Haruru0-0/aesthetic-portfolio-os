@@ -1,76 +1,79 @@
-import { useContext } from "react"
+import { Check, LockKeyhole, Trophy } from "lucide-react"
 import HappyCat from "@/assets/mascots/happy-cat.webp"
 import { useAchievements, ACHIEVEMENTS } from "@/components/achievement-context"
-import { ScrollContainerContext } from "@/components/animated-section"
 import AnimatedContent from "@/components/AnimatedContent"
-import XpBar from "@/components/ui/8bit/xp-bar"
-import { QuestLog, type Quest } from "@/components/ui/8bit/blocks/quest-log"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 export default function Achievements() {
-  const scrollContainerRef = useContext(ScrollContainerContext)
   const { unlocked } = useAchievements()
   const total = ACHIEVEMENTS.length
-  const count = unlocked.size
+  const count = ACHIEVEMENTS.filter((achievement) => unlocked.has(achievement.id)).length
   const pct = Math.round((count / total) * 100)
-  const quests: Quest[] = ACHIEVEMENTS.map((a) => {
-    const done = unlocked.has(a.id)
-    return {
-      id: a.id,
-      title: done ? a.name : "??? ??? ???",
-      description: done ? a.description : "Keep exploring...",
-      status: done ? "completed" : "pending",
-    }
-  })
 
   return (
-    <div className="pixel-achievement-screen min-h-full p-4 space-y-5">
+    <div className="mx-auto max-w-4xl space-y-8 pixel-text">
+      <header className="text-center">
+        <AnimatedContent scale={0.82} ease="back.out(1.7)" className="inline-block">
+          <img src={HappyCat} alt="" className="mx-auto mb-4 h-24 w-24 object-contain" />
+        </AnimatedContent>
+        <h1 className="pixel-title mb-2 text-3xl font-bold">Achievements</h1>
+        <p className="opacity-80">Explore the portfolio to unlock them all.</p>
+      </header>
 
-      <AnimatedContent
-        scale={0.82}
-        ease="back.out(1.7)"
-        className="relative p-5 text-center"
-        style={{ border: "4px solid var(--cute-text)", boxShadow: "7px 7px 0 var(--cute-text)", background: "var(--card-bg)" }}
-      >
-        <div className="absolute pointer-events-none" style={{ inset: 5, border: "1px solid var(--cute-text)", opacity: 0.3 }} />
-        <p className="text-xs tracking-[0.35em] uppercase font-bold opacity-80 mb-3">— PORTFOLIO OS v1.0 —</p>
-        <div className="flex justify-center mb-3">
-          <div style={{ border: "3px solid var(--cute-text)", boxShadow: "4px 4px 0 var(--cute-text)", lineHeight: 0, display: "inline-block" }}>
-            <img src={HappyCat} alt="" className="w-16 h-16 block" style={{ imageRendering: "pixelated" }} />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold tracking-widest mb-1">★ ACHIEVEMENTS ★</h1>
-        <p className="text-xs tracking-wider opacity-85 mb-4">EXPLORE THE PORTFOLIO TO UNLOCK THEM ALL</p>
-        <div className="flex justify-center gap-3 flex-wrap">
-          <div className="px-3 py-1 text-xs font-bold tracking-wider"
-            style={{ border: "2px solid var(--cute-text)", background: "var(--cute-text)", color: "var(--cute-on-text)", boxShadow: "2px 2px 0 rgba(0,0,0,0.2)" }}>
-            SCORE: {count} / {total}
-          </div>
-          <div className="px-3 py-1 text-xs font-bold tracking-wider"
-            style={{ border: "2px solid var(--cute-text)", background: "var(--cute-highlight)", color: "var(--cute-text)", boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}>
-            {pct}% COMPLETE
-          </div>
-        </div>
-      </AnimatedContent>
+      <section aria-labelledby="achievement-progress-title">
+        <h2 id="achievement-progress-title" className="portfolio-section-title">Your progress</h2>
+        <Card className="pixel-card gap-4 py-5">
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 font-semibold">
+                <Trophy className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span>{count} of {total} unlocked</span>
+              </div>
+              <Badge variant="secondary">{pct}% complete</Badge>
+            </div>
+            <div
+              role="progressbar"
+              aria-label="Achievements unlocked"
+              aria-valuemin={0}
+              aria-valuemax={total}
+              aria-valuenow={count}
+              aria-valuetext={`${count} of ${total} achievements unlocked`}
+              className="h-3 overflow-hidden bg-[var(--cute-highlight)]"
+            >
+              <div className="h-full bg-[var(--cute-text)] transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${pct}%` }} />
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
-      <AnimatedContent distance={55} ease="back.out(1.4)">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs font-bold tracking-widest" style={{ color: "var(--cute-text)" }}>▸ EXP POINTS</span>
-          <span className="text-xs font-bold opacity-85">{count} / {total}</span>
-        </div>
-        <XpBar value={pct} variant="retro" aria-label={`Achievements ${count} of ${total} unlocked`} />
-      </AnimatedContent>
-
-      <AnimatedContent distance={55} ease="back.out(1.4)">
-        <QuestLog title="Trophy Case" quests={quests} />
-      </AnimatedContent>
-
-      <AnimatedContent
-        distance={0}
-        className="text-center py-2 text-xs tracking-[0.3em] uppercase opacity-80"
-        style={{ borderTop: "2px solid var(--cute-text)" }}
-      >
-        © AHMAD KANAAN — ALL RIGHTS RESERVED
-      </AnimatedContent>
+      <section aria-labelledby="achievement-collection-title">
+        <h2 id="achievement-collection-title" className="portfolio-section-title">Trophy case</h2>
+        <ul className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))" }}>
+          {ACHIEVEMENTS.map((achievement) => {
+            const done = unlocked.has(achievement.id)
+            const StatusIcon = done ? Check : LockKeyhole
+            return (
+              <li key={achievement.id}>
+                <Card className="pixel-card h-full gap-0 py-5">
+                  <CardContent className="flex items-start gap-4">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-[var(--cute-border)] bg-[var(--cute-highlight)]">
+                      <StatusIcon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="mb-1 text-xs opacity-80">{done ? "Unlocked" : "Locked"}</p>
+                      <h3 className="font-bold">{done ? achievement.name : "Hidden achievement"}</h3>
+                      <p className="mt-2 text-sm leading-relaxed opacity-80">
+                        {done ? achievement.description : "Keep exploring..."}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
     </div>
   )
 }

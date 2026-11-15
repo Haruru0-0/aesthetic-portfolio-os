@@ -19,12 +19,16 @@ export function GlassPanel({
   radius = "1.25rem",
   width = "100%",
   variant = "surface",
+  tintOverRim = true,
+  tintColor = "rgba(30,110,200,0.24)",
   ...props
 }: React.ComponentProps<"div"> & {
   contentClassName?: string
   radius?: string
   width?: number | string
   variant?: "surface" | "classic"
+  tintOverRim?: boolean
+  tintColor?: string
 }) {
   const wallpaper = useWallpaper()
   if (variant === "surface") {
@@ -41,9 +45,10 @@ export function GlassPanel({
         backgroundOpacity={0.1}
         saturation={1.4}
         backdrop={wallpaper}
+        tintOverlay={tintOverRim ? tintColor : undefined}
         className={cn("!block", className)}
       >
-        <div className={cn("w-full rounded-[inherit] bg-[rgba(30,110,200,0.24)] text-left", contentClassName)} {...props}>
+        <div className={cn("w-full rounded-[inherit] text-left", !tintOverRim && "bg-[rgba(30,110,200,0.24)]", contentClassName)} {...props}>
           {children}
         </div>
       </GlassSurface>

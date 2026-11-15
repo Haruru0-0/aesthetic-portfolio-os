@@ -515,7 +515,7 @@ export function AppWindow({
                 </div>
                 <div
                   ref={contentRefCallback}
-                  className="window-content"
+                  className={title === "Terminal" ? "window-content" : "window-content portfolio-app"}
                 onContextMenu={(e) => e.stopPropagation()}
                 role="region"
                 aria-label={title}
@@ -628,7 +628,7 @@ export function AppWindow({
               </div>
               <div
                 ref={contentRefCallback}
-                className="window-content"
+                className={title === "Terminal" ? "window-content" : "window-content portfolio-app"}
                 onContextMenu={(e) => e.stopPropagation()}
                 role="region"
                 aria-label={title}

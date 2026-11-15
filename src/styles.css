@@ -601,6 +601,40 @@ code {
   transform: translateY(0);
 }
 
+.lockscreen-clock {
+  color: white;
+  --unlock-glow: rgba(255, 255, 255, 0.65);
+  --unlock-halo: rgba(186, 230, 253, 0.45);
+  --clock-shadow: rgba(0, 15, 40, 0.5);
+  text-shadow: 0 1px 4px var(--clock-shadow);
+  transition: color 400ms ease, text-shadow 400ms ease;
+}
+
+.lockscreen-clock[data-dark-text="true"] {
+  color: #102034;
+  --unlock-glow: rgba(16, 32, 52, 0.25);
+  --unlock-halo: rgba(255, 255, 255, 0.55);
+  --clock-shadow: rgba(255, 255, 255, 0.65);
+}
+
+.lockscreen-unlock-hint {
+  display: inline-block;
+  animation: unlock-hint-glow 3.6s ease-in-out infinite;
+}
+
+@keyframes unlock-hint-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: translateY(2px);
+    text-shadow: 0 1px 3px var(--clock-shadow);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+    text-shadow: 0 0 8px var(--unlock-glow), 0 0 18px var(--unlock-halo);
+  }
+}
+
 /* Reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -617,6 +651,11 @@ code {
   .animate-bounce-slow,
   .animate-spin-slow {
     animation: none !important;
+  }
+
+  .lockscreen-unlock-hint {
+    animation: none !important;
+    opacity: 0.8;
   }
 }
 
@@ -642,7 +681,7 @@ code {
 }
 
 .liquidGlass-tint {
-  z-index: 1;
+  z-index: 2;
   position: absolute;
   inset: 0;
   background: rgba(37, 120, 210, 0.42);
@@ -652,7 +691,7 @@ code {
 .liquidGlass-shine {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 1;
   overflow: hidden;
   box-shadow: inset 1px 1px 0.5px 0 rgba(224, 242, 254, 0.55),
     inset -0.5px -0.5px 0.5px 0.5px rgba(224, 242, 254, 0.45);

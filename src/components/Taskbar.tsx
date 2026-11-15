@@ -125,8 +125,8 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                         )}
                       </DockButton>
                     </TooltipTrigger>
-                    <TooltipContent side="top" sideOffset={8} className="taskbar-tooltip bg-sky-400/30 backdrop-blur-md text-black border-none shadow-lg rounded-lg" arrowClassName="bg-transparent fill-transparent">
-                      <p>{app.label}</p>
+                    <TooltipContent side="top" sideOffset={20} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
+                      <GlassPanel radius="0.75rem" width="max-content" contentClassName="px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,15,40,0.8)]">{app.label}</GlassPanel>
                     </TooltipContent>
                   </Tooltip>
                 )
@@ -151,8 +151,8 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                         </DockButton>
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
-                    <TooltipContent side="top" sideOffset={8} className="taskbar-tooltip bg-sky-400/30 backdrop-blur-md text-black border-none shadow-lg rounded-lg" arrowClassName="bg-transparent fill-transparent">
-                      <p>More</p>
+                    <TooltipContent side="top" sideOffset={20} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
+                      <GlassPanel radius="0.75rem" width="max-content" contentClassName="px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,15,40,0.8)]">More</GlassPanel>
                     </TooltipContent>
                   </Tooltip>
 
@@ -182,8 +182,8 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                                     )}
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="left" sideOffset={8} className="taskbar-tooltip bg-sky-400/30 backdrop-blur-md text-black border-none shadow-lg rounded-lg" arrowClassName="bg-transparent fill-transparent">
-                                  <p>{app.label}</p>
+                                <TooltipContent side="left" sideOffset={16} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
+                                  <GlassPanel radius="0.75rem" width="max-content" contentClassName="px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,15,40,0.8)]">{app.label}</GlassPanel>
                                 </TooltipContent>
                               </Tooltip>
                             )
