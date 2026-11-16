@@ -442,7 +442,7 @@ function DesktopInner() {
             onSortApps={() => setDesktopApps((apps) => [...apps].sort((a, b) => a.label.localeCompare(b.label)))}
             onResetApps={() => setDesktopApps(initialAppsRef.current)}
           >
-          <div className="w-screen h-screen h-dvh overflow-hidden relative" onClick={() => setSelectedAppId(null)}>
+          <div className="fixed inset-0 overflow-hidden" onClick={() => setSelectedAppId(null)}>
             <img
               key={currentWallpaper?.id}
               ref={wallpaperRef}
