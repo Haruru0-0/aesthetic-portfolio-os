@@ -1,5 +1,7 @@
 import type * as React from "react"
-import { ArrowDownAZ, Check, Command as CommandIcon, Image as ImageIcon, Monitor, Moon, RotateCcw, Sun, Volume2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { ArrowDownAZ, Check, Clock3, Command as CommandIcon, Image as ImageIcon, Monitor, Moon, RotateCcw, Sun, Volume2 } from "lucide-react"
+import type { WallpaperChoice } from "./wallpaper-context"
 import {
   ContextMenu,
   ContextMenuCheckboxItem,
@@ -23,7 +25,7 @@ import { cn } from "@/lib/utils"
 
 type AppItem = { id: string; label: string; icon: string }
 
-const contentClass = "!min-w-0 w-72 !overflow-visible !border-none !bg-transparent !p-0 !shadow-none"
+const contentClass = "!z-[10000] !min-w-0 w-72 !overflow-visible !border-none !bg-transparent !p-0 !shadow-none"
 const itemClass =
   "gap-3 whitespace-nowrap px-3 py-2 text-slate-100 focus:bg-white/20 focus:text-white data-[highlighted]:bg-white/20 data-[state=open]:bg-white/20 [&>svg]:!text-slate-200"
 
@@ -60,6 +62,25 @@ function GlassCheckboxItem({ children, className, ...props }: React.ComponentPro
   )
 }
 
+function RotationMenu({ choice, padding }: { choice: WallpaperChoice; padding: { top: number; right: number; bottom: number; left: number } }) {
+  if (!choice.rotation || choice.wallpapers.length < 2) return null
+  const rotation = choice.rotation
+  return <>
+    <ContextMenuSeparator className="bg-white/25" />
+    <GlassCheckboxItem checked={rotation.enabled} onCheckedChange={rotation.setEnabled} onSelect={event => event.preventDefault()}>Change automatically</GlassCheckboxItem>
+    <ContextMenuSub>
+      <ContextMenuSubTrigger className={itemClass}><Clock3 />Change every</ContextMenuSubTrigger>
+      <ContextMenuSubContent className={contentClass} collisionPadding={padding} sticky="always">
+        <GlassPanel radius="1rem" contentClassName="p-1.5">
+          <ContextMenuRadioGroup value={String(rotation.intervalSeconds)} onValueChange={value => rotation.setIntervalSeconds(Number(value))}>
+            {[[30, '30 seconds'], [60, '1 minute'], [300, '5 minutes'], [900, '15 minutes'], [1800, '30 minutes'], [3600, '1 hour']].map(([seconds, label]) => <GlassRadioItem key={seconds} value={String(seconds)} onSelect={event => event.preventDefault()}>{label}</GlassRadioItem>)}
+          </ContextMenuRadioGroup>
+        </GlassPanel>
+      </ContextMenuSubContent>
+    </ContextMenuSub>
+  </>
+}
+
 export function DesktopContextMenu({
   enabled,
   apps,
@@ -80,18 +101,35 @@ export function DesktopContextMenu({
   const { isSoundEnabled, setSoundEnabled, playClickSound } = useAppSound()
   const { theme, setTheme } = useTheme()
   const wallpaper = useWallpaperChoice()
+  const [dockClearance, setDockClearance] = useState(140)
+  const measureDock = () => {
+    const docks = [...document.querySelectorAll<HTMLElement>("[data-taskbar]")]
+      .map(dock => dock.getBoundingClientRect())
+      .filter(box => box.width > 0 && box.height > 0)
+    const top = Math.min(window.innerHeight, ...docks.map(box => box.top))
+    setDockClearance(Math.max(16, window.innerHeight - top + 20))
+  }
+  useEffect(() => {
+    if (!enabled) return
+    const observer = new ResizeObserver(measureDock)
+    document.querySelectorAll("[data-taskbar]").forEach(dock => observer.observe(dock))
+    window.addEventListener("resize", measureDock)
+    measureDock()
+    return () => { observer.disconnect(); window.removeEventListener("resize", measureDock) }
+  }, [enabled])
+  const collisionPadding = { top: 48, right: 12, bottom: dockClearance, left: 12 }
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild disabled={!enabled}>
+      <ContextMenuTrigger asChild disabled={!enabled} onContextMenuCapture={measureDock}>
         {children}
       </ContextMenuTrigger>
-      <ContextMenuContent className={contentClass}>
+      <ContextMenuContent className={contentClass} collisionPadding={collisionPadding} sticky="always">
         <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
           <ContextMenuLabel className="px-3 py-1.5 text-xs text-slate-200">Desktop</ContextMenuLabel>
           <ContextMenuSub>
             <ContextMenuSubTrigger className={itemClass}>Open app</ContextMenuSubTrigger>
-            <ContextMenuSubContent className={contentClass}>
+            <ContextMenuSubContent className={contentClass} collisionPadding={collisionPadding} sticky="always">
               <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                 {apps.map((app) => (
                   <ContextMenuItem key={app.id} className={itemClass} onSelect={() => onOpenApp(app.label)}>
@@ -122,7 +160,7 @@ export function DesktopContextMenu({
                 <ImageIcon />
                 Wallpaper
               </ContextMenuSubTrigger>
-              <ContextMenuSubContent className={contentClass}>
+              <ContextMenuSubContent className={contentClass} collisionPadding={collisionPadding} sticky="always">
                 <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                   {wallpaper.wallpapers.length > 1 && (
                     <>
@@ -141,6 +179,7 @@ export function DesktopContextMenu({
                       </GlassRadioItem>
                     ))}
                   </ContextMenuRadioGroup>
+                  <RotationMenu choice={wallpaper} padding={collisionPadding} />
                 </GlassPanel>
               </ContextMenuSubContent>
             </ContextMenuSub>
@@ -151,7 +190,7 @@ export function DesktopContextMenu({
                 <ImageIcon />
                 Lock screen
               </ContextMenuSubTrigger>
-              <ContextMenuSubContent className={contentClass}>
+              <ContextMenuSubContent className={contentClass} collisionPadding={collisionPadding} sticky="always">
                 <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                   <ContextMenuRadioGroup value={wallpaper.lock.current?.id} onValueChange={wallpaper.lock.select}>
                     {wallpaper.lock.wallpapers.map((w) => (
@@ -161,6 +200,7 @@ export function DesktopContextMenu({
                       </GlassRadioItem>
                     ))}
                   </ContextMenuRadioGroup>
+                  <RotationMenu choice={wallpaper.lock} padding={collisionPadding} />
                 </GlassPanel>
               </ContextMenuSubContent>
             </ContextMenuSub>
@@ -181,7 +221,7 @@ export function DesktopContextMenu({
               <Monitor />
               Theme
             </ContextMenuSubTrigger>
-            <ContextMenuSubContent className={contentClass}>
+            <ContextMenuSubContent className={contentClass} collisionPadding={collisionPadding} sticky="always">
               <GlassPanel tintOverRim radius="1rem" contentClassName="p-1.5 hover:p-2.5 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] motion-reduce:transition-none">
                 <ContextMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as "light" | "dark" | "system")}>
                   <GlassRadioItem value="light">

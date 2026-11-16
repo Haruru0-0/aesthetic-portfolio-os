@@ -1,4 +1,5 @@
 import React from "react";
+import { WallpaperBackdrop } from "./WallpaperBackdrop";
 import {
   DndContext,
   DragOverlay,
@@ -16,6 +17,8 @@ import { DesktopIcon } from "./Icon";
 import { MobileIcon } from "./MobileIcon";
 import { WallpaperText } from "./WallpaperText";
 import { Taskbar } from "./Taskbar";
+import { AppSwitcher } from "./AppSwitcher";
+import { readDesktopSession, saveDesktopSession } from "@/lib/desktop-session";
 import MenuBar from "./MenuBar";
 import { CommandMenu } from "./CommandMenu";
 import { DesktopContextMenu } from "./DesktopContextMenu";
@@ -69,7 +72,55 @@ function DesktopInner() {
 
   const isDesktop = useMediaQuery("(min-width: 650px)");
   const [viewportW, setViewportW] = useState(() => window.innerWidth);
+  const [viewportH, setViewportH] = useState(() => window.innerHeight);
+  const [menuBarHeight, setMenuBarHeight] = useState(70);
+  const [dockClearance, setDockClearance] = useState(100);
+  useEffect(() => {
+    if (!isDesktop) return;
+    const menu = document.querySelector<HTMLElement>("[data-menu-bar]");
+    if (!menu) return;
+    const measure = () => {
+      const content = menu.querySelector<HTMLElement>("[data-menu-bar-content]");
+      const style = content ? getComputedStyle(content) : null;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      // Reserve its expanded padding so hovering cannot change the icon row count.
+      const expandedPadding = Number(menu.dataset.menuBarHoverPadding) || 1.375;
+      const actualHeight = menu.getBoundingClientRect().height;
+      const height = style ? actualHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) + expandedPadding * rem : actualHeight;
+      setMenuBarHeight(Math.round(height));
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(menu);
+    measure();
+    return () => observer.disconnect();
+  }, [isDesktop]);
+  useEffect(() => {
+    if (!isDesktop) return;
+    const dock = document.querySelector<HTMLElement>("[data-taskbar]");
+    if (!dock) return;
+    const measure = () => {
+      const inner = dock.querySelector<HTMLElement>(".dock");
+      if (!inner) return;
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const frame = dock.offsetHeight - inner.offsetHeight;
+      const base = Number(dock.dataset.taskbarBaseSize) || 50;
+      const padding = (Number(dock.dataset.taskbarIdlePadding) || 1.2) * rem;
+      const bottom = parseFloat(getComputedStyle(dock).bottom) || 0;
+      // offsetHeight ignores the entrance transform; normal icon size ignores magnification.
+      setDockClearance(Math.ceil(frame + base + padding + bottom + 12));
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(dock);
+    window.addEventListener("resize", measure);
+    measure();
+    return () => { observer.disconnect(); window.removeEventListener("resize", measure); };
+  }, [isDesktop]);
+  const [greetingAside, setGreetingAside] = useState(false);
+  const [greetingWidth, setGreetingWidth] = useState(240);
   const [greeting, setGreeting] = useState("Good morning");
+  const greetingShellRef = useRef<HTMLDivElement>(null);
+  const desktopIconAreaRef = useRef<HTMLDivElement>(null);
+  const desktopIconGridRef = useRef<HTMLDivElement>(null);
   const greetingRef = useRef<HTMLDivElement>(null);
   const greetingImageRef = useRef<HTMLImageElement>(null);
   const greetingTextRef = useRef<HTMLHeadingElement>(null);
@@ -81,10 +132,10 @@ function DesktopInner() {
   const wallpaperRef = useRef<HTMLImageElement>(null);
   const mobileWallpaperRef = useRef<HTMLImageElement>(null);
 
-  const desktopHome = useWallpaperSelection("desktop");
-  const mobileHome = useWallpaperSelection("mobile");
-  const desktopLock = useWallpaperSelection("desktop-lock");
-  const mobileLock = useWallpaperSelection("mobile-lock");
+  const desktopHome = useWallpaperSelection("desktop", isDesktop);
+  const mobileHome = useWallpaperSelection("mobile", !isDesktop);
+  const desktopLock = useWallpaperSelection("desktop-lock", false);
+  const mobileLock = useWallpaperSelection("mobile-lock", false);
   const currentWallpaper = desktopHome.current;
   const currentMobileWallpaper = mobileHome.current;
 
@@ -147,7 +198,7 @@ function DesktopInner() {
   }, []);
 
   useEffect(() => {
-    const onResize = () => setViewportW(window.innerWidth);
+    const onResize = () => { setViewportW(window.innerWidth); setViewportH(window.innerHeight); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -164,6 +215,31 @@ function DesktopInner() {
   ]);
 
   const initialAppsRef = useRef(desktopApps);
+  // Normal tiles need 96px; leave room for one selected label to expand without changing columns.
+  const rowsThatFit = Math.max(1, Math.floor((viewportH - menuBarHeight - 12 - dockClearance - 24 + 16) / 112));
+  const desktopIconRows = Math.min(Math.ceil(desktopApps.length / 2), rowsThatFit);
+  useEffect(() => {
+    if (!isDesktop) return;
+    const shell = greetingShellRef.current;
+    const grid = desktopIconGridRef.current;
+    const area = desktopIconAreaRef.current;
+    if (!shell || !grid || !area) return;
+    const measure = () => {
+      const width = shell.offsetWidth;
+      const left = window.innerWidth / 2 - width / 2;
+      const bounds = area.getBoundingClientRect();
+      // Compare with the unscrolled icon footprint, so moving aside cannot cause a feedback loop.
+      const iconsRight = bounds.left + grid.offsetWidth;
+      const nearCenter = iconsRight > left - 24 && bounds.left < left + width + 24;
+      const overlapsHeight = bounds.top < 36 + shell.offsetHeight && bounds.top + grid.offsetHeight > 36;
+      setGreetingWidth(width);
+      setGreetingAside(nearCenter && overlapsHeight);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(shell); observer.observe(grid);
+    measure();
+    return () => observer.disconnect();
+  }, [isDesktop, viewportW, viewportH, desktopIconRows, menuBarHeight, showCue]);
 
   // 50px icon + 8px gap = 58px/slot; ~20px dock padding + 8px safe margin = 28px overhead
   const maxFit   = Math.floor((viewportW - 28) / 58);
@@ -171,7 +247,16 @@ function DesktopInner() {
   const taskbarVisible  = desktopApps.slice(0, splitAt);
   const taskbarOverflow = desktopApps.slice(splitAt);
 
-  const [openWindows, setOpenWindows] = useState<WindowData[]>([]);
+  const [initialSession] = useState(readDesktopSession);
+  const [openWindows, setOpenWindows] = useState<WindowData[]>(() => initialSession.windows.map(win => ({ ...win, component: getComponentForWindow(win.name) })));
+  const [focusedWindow, setFocusedWindow] = useState<string | null>(initialSession.focused);
+  const [focusRequests, setFocusRequests] = useState<Record<string, number>>(() => initialSession.focused ? { [initialSession.focused]: 1 } : {});
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  useEffect(() => { saveDesktopSession({ windows: openWindows.map(({ name, minimized }) => ({ name, minimized })), focused: focusedWindow }) }, [openWindows, focusedWindow]);
+  const requestAppFocus = (name: string) => {
+    setFocusedWindow(name);
+    setFocusRequests(previous => ({ ...previous, [name]: (previous[name] ?? 0) + 1 }));
+  };
   const [activeAppId, setActiveAppId] = useState<string | null>(null);
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
 
@@ -211,7 +296,7 @@ function DesktopInner() {
     }
   }, [openWindows, isDesktop]);
 
-  const getComponentForWindow = (name: string) => {
+  function getComponentForWindow(name: string) {
     switch (name) {
       case "About me":
         return <AboutMe />;
@@ -244,8 +329,9 @@ function DesktopInner() {
   };
 
   const openWindow = (name: string) => {
+    requestAppFocus(name);
     setOpenWindows((prev) => {
-      if (prev.find((w) => w.name === name)) return prev;
+      if (prev.find((w) => w.name === name)) return prev.map(w => w.name === name ? { ...w, minimized: false } : w);
       return [
         ...prev,
         { name, minimized: false, component: getComponentForWindow(name) },
@@ -267,10 +353,12 @@ function DesktopInner() {
   };
 
   const closeWindow = (name: string) => {
+    if (focusedWindow === name) setFocusedWindow([...openWindows].reverse().find(win => win.name !== name && !win.minimized)?.name ?? null);
     setOpenWindows((prev) => prev.filter((w) => w.name !== name));
   };
 
   const minimizeWindow = (name: string) => {
+    if (focusedWindow === name) setFocusedWindow([...openWindows].reverse().find(win => win.name !== name && !win.minimized)?.name ?? null);
     setOpenWindows((prev) =>
       prev.map((w) => (w.name === name ? { ...w, minimized: true } : w))
     );
@@ -278,6 +366,7 @@ function DesktopInner() {
   };
 
   const restoreWindow = (name: string) => {
+    requestAppFocus(name);
     setOpenWindows((prev) =>
       prev.map((w) => (w.name === name ? { ...w, minimized: false } : w))
     );
@@ -443,42 +532,24 @@ function DesktopInner() {
             onResetApps={() => setDesktopApps(initialAppsRef.current)}
           >
           <div className="fixed inset-0 overflow-hidden" onClick={() => setSelectedAppId(null)}>
-            <img
-              key={currentWallpaper?.id}
-              ref={wallpaperRef}
-              src={currentWallpaper?.src}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
-              style={{ opacity: isDesktop ? 1 : 0 }}
-            />
-            <img
-              key={currentMobileWallpaper?.id}
-              ref={mobileWallpaperRef}
-              src={currentMobileWallpaper?.src}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
-              style={{ opacity: isDesktop ? 0 : 1 }}
-            />
+            <WallpaperBackdrop src={currentWallpaper?.src} imageRef={wallpaperRef} active={isDesktop} />
+            <WallpaperBackdrop src={currentMobileWallpaper?.src} imageRef={mobileWallpaperRef} active={!isDesktop} />
             {/* Page transition overlay — fades out on mount */}
             <div
               ref={pageOverlayRef}
               className="fixed inset-0 bg-black z-[99999] pointer-events-none"
             />
 
-            {isDesktop && <MenuBar onOpenPalette={() => setPaletteOpen(true)} />}
+            {isDesktop && <MenuBar onOpenPalette={() => setPaletteOpen(true)} onOpenSwitcher={() => setSwitcherOpen(true)} />}
 
             {isDesktop && (
-              <div className="absolute top-9 left-1/2 -translate-x-1/2 text-center pointer-events-none">
+              <div ref={greetingShellRef} data-greeting-position={greetingAside ? "side" : "center"} className={`absolute w-max max-w-[calc(100vw-2rem)] text-center pointer-events-none ${greetingAside ? "right-4" : "top-9 left-1/2 -translate-x-1/2"}`} style={greetingAside ? { top: menuBarHeight + 12 } : undefined}>
                 <div ref={greetingRef} className="flex flex-col items-center">
                   <img
                     ref={greetingImageRef}
                     src={GreetingGif}
                     alt="Cute greeting"
-                    className="w-24 h-24 mb-2 animate-float"
+                    className="size-24 mb-2 animate-float"
                     style={{
                       willChange: "transform",
                       backfaceVisibility: "hidden",
@@ -502,18 +573,18 @@ function DesktopInner() {
             )}
 
             {isDesktop ? (
-              <div className="absolute inset-0 flex flex-col gap-2 p-4 pt-12">
+              <div className="absolute inset-0 flex flex-col gap-2 p-4" style={{ paddingTop: menuBarHeight + 12, paddingBottom: dockClearance }}>
                 {/* flex-1 + min-h-0 lets this shrink and defines the icon column height */}
-                <div className="flex-1 min-h-0 overflow-hidden">
+                <div ref={desktopIconAreaRef} className="flex-1 min-h-0 overflow-auto" role="group" aria-label="Desktop apps" style={greetingAside ? { marginRight: greetingWidth + 16 } : undefined}>
                   <SortableContext
                     items={desktopApps.map((a) => a.id)}
                     strategy={rectSortingStrategy}
                   >
-                    <div className="flex flex-col flex-wrap gap-4 h-full w-fit content-start pointer-events-none">
+                    <div ref={desktopIconGridRef} className="grid w-max grid-flow-col auto-cols-[7rem] content-start gap-4 pointer-events-none" style={{ gridTemplateRows: `repeat(${desktopIconRows}, minmax(6rem, max-content))` }}>
                       {desktopApps.map((app, index) => (
                         <div
                           key={app.id}
-                          className="min-h-28"
+                          className="min-h-24"
                           ref={(el) => {
                             if (el) desktopIconsRef.current[index] = el;
                           }}
@@ -656,7 +727,7 @@ function DesktopInner() {
                         <div className="widget-glass-overlay rounded-2xl" />
                       </div>
                     </div>
-                    <MobileControlTiles onOpenPalette={() => setPaletteOpen(true)} />
+                    <MobileControlTiles onOpenSwitcher={() => setSwitcherOpen(true)} />
                   </div>
 
                   <MusicPlayerWidget isDesktop={false} />
@@ -679,11 +750,14 @@ function DesktopInner() {
                 onMinimize={() => minimizeWindow(win.name)}
                 isMobile={!isDesktop}
                 isMinimized={win.minimized}
+                focusRequest={focusRequests[win.name] ?? 0}
+                onActivate={() => setFocusedWindow(win.name)}
               >
                 {win.component}
               </AppWindow>
             ))}
 
+            <AppSwitcher open={switcherOpen} onOpenChange={setSwitcherOpen} activeName={focusedWindow} onSelect={handleAppClick} onSearch={() => setPaletteOpen(true)} apps={openWindows.map(win => ({ name: win.name, minimized: win.minimized, icon: desktopApps.find(app => app.label === win.name)?.icon ?? About }))} />
             <CommandMenu
               open={paletteOpen}
               onOpenChange={setPaletteOpen}

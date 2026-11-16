@@ -362,7 +362,7 @@ code {
 .liquidGlass-icon.desktop-icon-selected,
 .liquidGlass-icon.desktop-icon-selected:hover {
   overflow: visible;
-  box-shadow: inset 0 0 0 2px var(--accent-color);
+  box-shadow: none;
   z-index: 20;
 }
 
@@ -653,6 +653,12 @@ code {
     animation: none !important;
   }
 
+  [data-app-icon-selection],
+  [data-app-switcher-selection],
+  [data-wallpaper-selection] {
+    transform: none !important;
+  }
+
   .lockscreen-unlock-hint {
     animation: none !important;
     opacity: 0.8;
@@ -735,6 +741,22 @@ code {
   height: 100%;
   object-fit: contain;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
+
+.dock-more {
+  border-radius: 1rem;
+  outline: none;
+}
+
+.dock-more[aria-expanded="true"] {
+  background: rgba(186, 230, 253, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(186, 230, 253, 0.3);
+}
+
+.dock-more:focus-visible {
+  outline: 2px solid #bae6fd;
+  outline-offset: 3px;
+  background: rgba(186, 230, 253, 0.12);
 }
 
 .dock-icon:hover {
@@ -1008,19 +1030,6 @@ code {
 
 .liquidGlass-wrapper.glass-panel .liquidGlass-tint {
   background: rgba(8, 47, 73, 0.72);
-}
-
-/* Fade the desktop wallpaper in when it changes */
-@keyframes wallpaper-in {
-  from { opacity: 0; }
-}
-
-.wallpaper-in {
-  animation: wallpaper-in 0.7s ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wallpaper-in { animation: none; }
 }
 
 /* Dock magnification: icon sizes are driven by springs in Taskbar.tsx */

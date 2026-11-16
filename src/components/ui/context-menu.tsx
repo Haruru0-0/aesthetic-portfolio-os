@@ -80,6 +80,7 @@ function ContextMenuSubContent({
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.SubContent>) {
   return (
+    <ContextMenuPrimitive.Portal>
     <ContextMenuPrimitive.SubContent
       data-slot="context-menu-sub-content"
       className={cn(
@@ -88,6 +89,7 @@ function ContextMenuSubContent({
       )}
       {...props}
     />
+    </ContextMenuPrimitive.Portal>
   )
 }
 

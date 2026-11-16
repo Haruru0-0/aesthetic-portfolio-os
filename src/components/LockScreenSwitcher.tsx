@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Settings } from "lucide-react"
 import { GlassPanel } from "@/components/GlassPanel"
 import { WallpaperGrid } from "@/components/WallpaperGrid"
+import { WallpaperRotationSettings } from "./WallpaperRotationSettings"
 import { useAppSound } from "@/components/sound-context"
 import type { WallpaperChoice } from "@/components/wallpaper-context"
 
@@ -39,11 +40,12 @@ export function LockScreenSwitcher({ choice, portrait, hidden }: { choice: Wallp
       onClick={(e) => e.stopPropagation()}
     >
       {open && (
-        <div className={portrait ? "w-64 max-w-[calc(100vw-2rem)]" : "w-80 max-w-[calc(100vw-2rem)]"}>
+        <div className={`max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl ${portrait ? "w-64 max-w-[calc(100vw-2rem)]" : "w-80 max-w-[calc(100vw-2rem)]"}`}>
           <GlassPanel radius="1rem" contentClassName="p-3">
             <p className="mb-2 text-sm font-bold text-slate-100">Lock screen wallpaper</p>
             {portrait && <p className="mb-2 text-xs text-slate-200">Swipe to browse wallpapers.</p>}
             <WallpaperGrid choice={choice} portrait={portrait} className={portrait ? undefined : "-m-1 max-h-72 overflow-y-auto p-1"} />
+            <WallpaperRotationSettings choice={choice} />
           </GlassPanel>
         </div>
       )}

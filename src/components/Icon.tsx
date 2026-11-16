@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react"
 import { useEffect, useRef } from "react"
 import { useAppSound } from "./sound-context"
 import { WallpaperText } from "./WallpaperText"
+import { motion, useReducedMotion } from "motion/react"
 
 export function DesktopIcon({
   id,
@@ -19,6 +20,7 @@ export function DesktopIcon({
   const iconRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
   const { playClickSound, playHoverSound } = useAppSound()
+  const reducedMotion = useReducedMotion()
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -38,8 +40,9 @@ export function DesktopIcon({
 
     if (iconRef.current) {
       gsap.to(iconRef.current, {
-        scale: 1.1,
-        rotation: 5,
+        scale: 1.06,
+        rotation: 0,
+        overwrite: "auto",
         duration: 0.2,
         ease: "power2.out"
       })
@@ -54,6 +57,7 @@ export function DesktopIcon({
       gsap.to(iconRef.current, {
         scale: 1,
         rotation: 0,
+        overwrite: "auto",
         duration: 0.2,
         ease: "power2.out"
       })
@@ -66,7 +70,8 @@ export function DesktopIcon({
 
     if (iconRef.current) {
       gsap.to(iconRef.current, {
-        scale: 0.9,
+        scale: 0.94,
+        overwrite: "auto",
         duration: 0.1,
         ease: "power2.out"
       })
@@ -79,7 +84,8 @@ export function DesktopIcon({
 
     if (iconRef.current) {
       gsap.to(iconRef.current, {
-        scale: 1.1,
+        scale: 1.06,
+        overwrite: "auto",
         duration: 0.1,
         ease: "power2.out"
       })
@@ -140,6 +146,17 @@ export function DesktopIcon({
       <div className="liquidGlass-effect"></div>
       <div className="liquidGlass-tint"></div>
       <div className="liquidGlass-shine"></div>
+      {isSelected && !isBeingDragged && (
+        <motion.div
+          aria-hidden="true"
+          data-app-icon-selection=""
+          layoutId="desktop-app-icon-selection"
+          initial={false}
+          transition={{ duration: reducedMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="pointer-events-none absolute inset-0 z-[5] rounded-[inherit]"
+          style={{ boxShadow: "inset 0 0 0 2px var(--accent-color)" }}
+        />
+      )}
       <div className="liquidGlass-content">
         <div
           ref={iconRef}

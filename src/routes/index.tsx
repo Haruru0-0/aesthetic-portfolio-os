@@ -13,6 +13,7 @@ import { useGSAP } from "@gsap/react";
 import { useWallpaperSelection } from "@/lib/use-wallpaper-selection";
 import { LockScreenSwitcher } from "@/components/LockScreenSwitcher";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { WallpaperBackdrop } from "@/components/WallpaperBackdrop";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -29,8 +30,8 @@ function LoginScreen() {
 
   const isDesktop = useMediaQuery("(min-width: 650px)");
 
-  const desktopLock = useWallpaperSelection("desktop-lock");
-  const mobileLock = useWallpaperSelection("mobile-lock");
+  const desktopLock = useWallpaperSelection("desktop-lock", isDesktop);
+  const mobileLock = useWallpaperSelection("mobile-lock", !isDesktop);
   const desktopWallpaperRef = useRef<HTMLImageElement>(null);
   const mobileWallpaperRef = useRef<HTMLImageElement>(null);
   const timeRef = useRef<HTMLHeadingElement>(null);
@@ -280,26 +281,8 @@ function LoginScreen() {
         className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden"
         onClick={handleScreenClick}
       >
-        <img
-          key={desktopLock.current?.id}
-          ref={desktopWallpaperRef}
-          src={desktopLock.current?.src}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
-          style={{ opacity: isDesktop ? 1 : 0 }}
-        />
-        <img
-          key={mobileLock.current?.id}
-          ref={mobileWallpaperRef}
-          src={mobileLock.current?.src}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="wallpaper-in pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center transition-opacity duration-700"
-          style={{ opacity: isDesktop ? 0 : 1 }}
-        />
+        <WallpaperBackdrop src={desktopLock.current?.src} imageRef={desktopWallpaperRef} active={isDesktop} />
+        <WallpaperBackdrop src={mobileLock.current?.src} imageRef={mobileWallpaperRef} active={!isDesktop} />
         <LockScreenSwitcher choice={isDesktop ? desktopLock : mobileLock} portrait={!isDesktop} hidden={showLogin} />
         {/* Time display */}
         <div ref={clockGroupRef} data-dark-text={darkClockText} className="lockscreen-clock relative flex flex-col items-center">

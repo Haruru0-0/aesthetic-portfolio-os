@@ -95,6 +95,9 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
   return (
     <div
       ref={taskbarRef}
+      data-taskbar=""
+      data-taskbar-base-size={DOCK_BASE}
+      data-taskbar-idle-padding={magnify ? 1.35 : 1.2}
       className={`fixed bottom-2 left-1/2 -translate-x-1/2 z-[60] ${className}`}
       style={{ width: "auto" }}
     >
@@ -125,7 +128,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                         )}
                       </DockButton>
                     </TooltipTrigger>
-                    <TooltipContent side="top" sideOffset={20} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
+                    <TooltipContent side="top" sideOffset={36} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
                       <GlassPanel radius="0.75rem" width="max-content" contentClassName="px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,15,40,0.8)]">{app.label}</GlassPanel>
                     </TooltipContent>
                   </Tooltip>
@@ -139,7 +142,8 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                     <TooltipTrigger asChild>
                       <DropdownMenuTrigger asChild>
                         <DockButton
-                          className="dock-icon group relative"
+                          aria-label="More apps"
+                          className="dock-icon dock-more group relative"
                           onClick={() => playMenuSound()}
                           onMouseEnter={() => playHoverSound()}
                         >
@@ -151,16 +155,16 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                         </DockButton>
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
-                    <TooltipContent side="top" sideOffset={20} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
+                    <TooltipContent side="top" sideOffset={36} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
                       <GlassPanel radius="0.75rem" width="max-content" contentClassName="px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,15,40,0.8)]">More</GlassPanel>
                     </TooltipContent>
                   </Tooltip>
 
                   <DropdownMenuContent
                     side="top"
-                    sideOffset={12}
+                    sideOffset={36}
                     align="center"
-                    className="!bg-transparent !border-none !p-0 !shadow-none !min-w-0 !overflow-visible"
+                    className="!z-[80] !bg-transparent !border-none !p-0 !shadow-none !min-w-0 !overflow-visible"
                   >
                     <GlassPanel radius="1.25rem" width="max-content" contentClassName="p-0">
                         <div className="flex flex-col items-center gap-1 p-2">
@@ -182,7 +186,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                                     )}
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="left" sideOffset={16} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
+                                <TooltipContent side="left" sideOffset={24} className="taskbar-tooltip z-[80] border-0 bg-transparent p-0 shadow-none" showArrow={false}>
                                   <GlassPanel radius="0.75rem" width="max-content" contentClassName="px-2 py-0.5 text-xs font-medium text-white whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,15,40,0.8)]">{app.label}</GlassPanel>
                                 </TooltipContent>
                               </Tooltip>

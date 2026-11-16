@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
-import { Search } from "lucide-react"
+import { Search, PanelsTopLeft } from "lucide-react"
 import { GlassPanel } from "@/components/GlassPanel"
 import { ModeToggle } from "./mode-toggle"
 import { SoundSettings } from "./sound-settings"
 import HalloGif from "../assets/mascots/hallo.webp";
 
-export default function MenuBar({ onOpenPalette }: { onOpenPalette?: () => void }) {
+export default function MenuBar({ onOpenPalette, onOpenSwitcher }: { onOpenPalette?: () => void; onOpenSwitcher?: () => void }) {
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -18,11 +18,12 @@ export default function MenuBar({ onOpenPalette }: { onOpenPalette?: () => void 
   }, [])
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50">
+    <div data-menu-bar="" data-menu-bar-hover-padding="1.375" className="fixed top-0 left-0 right-0 z-50">
       <GlassPanel
+        data-menu-bar-content=""
         radius="1.5rem"
         className="group !rounded-b-3xl !rounded-t-none"
-        contentClassName="flex items-center justify-between px-4 py-2.5 text-lg font-medium transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] group-hover:py-3.5"
+        contentClassName="flex items-center justify-between px-4 py-1 text-base font-medium transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] group-hover:py-[11px]"
         style={{ color: "var(--cute-text)" }}
       >
         <div className="flex w-full items-center justify-between">
@@ -33,6 +34,7 @@ export default function MenuBar({ onOpenPalette }: { onOpenPalette?: () => void 
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {onOpenSwitcher && <button type="button" onClick={onOpenSwitcher} aria-label="Switch apps (Alt + backtick)" className="cursor-pointer rounded-full p-2 text-slate-200 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-200"><PanelsTopLeft className="size-4" aria-hidden="true" /></button>}
             {onOpenPalette && (
               <button
                 type="button"

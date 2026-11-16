@@ -6,6 +6,7 @@ import { IconTile } from "@/components/IconTile"
 import { useWallpaperChoice } from "@/components/wallpaper-context"
 import { WallpaperGrid } from "@/components/WallpaperGrid"
 import { cn } from "@/lib/utils"
+import { WallpaperRotationSettings } from "./WallpaperRotationSettings"
 
 // Mobile wallpaper picker: a tile that opens a glass sheet with a thumbnail for each wallpaper.
 export function WallpaperPicker() {
@@ -49,6 +50,7 @@ export function WallpaperPicker() {
             )}
             <p className="mb-2 text-xs text-slate-200">Swipe to browse wallpapers.</p>
             <WallpaperGrid key={tab} choice={active} portrait onPick={() => setOpen(false)} />
+            <WallpaperRotationSettings choice={active} />
           </GlassPanel>
         </div>
       </DrawerContent>

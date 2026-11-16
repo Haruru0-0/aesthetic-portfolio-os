@@ -12,6 +12,7 @@ import { useAppSound } from "./sound-context";
 import { CuteSuspenseFallback } from "./suspense-fallback";
 import { SnapMenu, type SnapType } from "./SnapMenu";
 import { ScrollContainerProvider } from "./animated-section";
+import { readWindowLayout, saveWindowLayout } from "@/lib/desktop-session";
 
 let globalZ = 100;
 const getOptimalWindowSize = (title: string) => {
@@ -41,6 +42,8 @@ export function AppWindow({
   onMinimize,
   isMobile = false,
   isMinimized = false,
+  focusRequest = 0,
+  onActivate,
 }: {
   title: string;
   children: React.ReactNode;
@@ -48,13 +51,23 @@ export function AppWindow({
   onMinimize?: () => void;
   isMobile?: boolean;
   isMinimized?: boolean;
+  focusRequest?: number;
+  onActivate?: () => void;
 }) {
   const [isDragging, setIsDragging] = useState(false);
-  const [zIndex, setZIndex] = useState(globalZ++);
-  const [isMaximized, setIsMaximized] = useState(isMobile ? true : false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [savedLayout] = useState(() => readWindowLayout(title, { width: window.innerWidth, height: window.innerHeight }));
+  const [zIndex, setZIndex] = useState(() => globalZ++);
+  const [isMaximized, setIsMaximized] = useState(isMobile || savedLayout?.maximized === true);
+  const [snapType, setSnapType] = useState<SnapType | null>(savedLayout?.snap as SnapType | null ?? null);
+  const [position, setPosition] = useState(() => savedLayout?.position ?? {
+    x: Math.max(10, (window.innerWidth - getOptimalWindowSize(title).width) / 2),
+    y: Math.max(40, (window.innerHeight - getOptimalWindowSize(title).height) / 2),
+  });
   const [size, setSize] = useState<{ width: string | number; height: string | number }>(
-    getOptimalWindowSize(title)
+    () => savedLayout?.size ?? {
+      width: Math.min(getOptimalWindowSize(title).width, Math.max(350, window.innerWidth - 20)),
+      height: Math.min(getOptimalWindowSize(title).height, Math.max(300, window.innerHeight - 60)),
+    }
   );
   const [isVisible, setIsVisible] = useState(false);
   const [prevSize, setPrevSize] = useState<{ width: string | number; height: string | number }>(
@@ -74,14 +87,6 @@ export function AppWindow({
   useEffect(() => {
     if (hasInitialized.current) return;
 
-    const sizeWidth = typeof size.width === 'number' ? size.width : 800;
-    const sizeHeight = typeof size.height === 'number' ? size.height : 600;
-    const centerX = window.innerWidth / 2 - sizeWidth / 2;
-    const centerY = window.innerHeight / 2 - sizeHeight / 2;
-    setPosition({
-      x: Math.max(10, Math.min(centerX, window.innerWidth - sizeWidth - 10)),
-      y: Math.max(10, Math.min(centerY, window.innerHeight - sizeHeight - 10)),
-    });
     setIsVisible(true);
     playWindowOpenSound();
     hasInitialized.current = true;
@@ -89,9 +94,29 @@ export function AppWindow({
   useEffect(() => {
     if (isMobile) {
       setIsMaximized(true);
+    } else {
+      const layout = readWindowLayout(title, { width: window.innerWidth, height: window.innerHeight });
+      setIsMaximized(layout?.maximized ?? false);
+      if (layout) {
+        setPosition(layout.position); setPrevPosition(layout.position);
+        setSize(layout.size); setPrevSize(layout.size);
+        setSnapType(layout.snap as SnapType | null);
+      }
     }
   }, [isMobile]);
-  const bringToFront = () => setZIndex(++globalZ);
+  const bringToFront = () => { setZIndex(++globalZ); onActivate?.(); };
+  useEffect(() => {
+    if (!focusRequest || isMinimized) return;
+    setZIndex(++globalZ);
+    const frame = requestAnimationFrame(() => contentRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [focusRequest, isMinimized]);
+  const previousMobile = useRef(isMobile);
+  useEffect(() => {
+    if (previousMobile.current !== isMobile) { previousMobile.current = isMobile; return; }
+    if (isMobile) return;
+    saveWindowLayout(title, { position, size: { width: Number(size.width), height: Number(size.height) }, maximized: isMaximized, snap: snapType });
+  }, [title, position, size, isMaximized, snapType, isMobile]);
   const toggleMaximize = () => {
     bringToFront();
     if (isMobile) return;
@@ -193,10 +218,11 @@ export function AppWindow({
     if (prefersReducedMotion) {
       gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3 });
     } else {
+      const baseY = Number(gsap.getProperty(el, "y")) || 0;
       gsap.fromTo(
         el,
-        { opacity: 0, scale: 0.92, y: 10 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: "back.out(1.4)" }
+        { opacity: 0, scale: 0.92, y: baseY + 10 },
+        { opacity: 1, scale: 1, y: baseY, duration: 0.35, ease: "back.out(1.4)" }
       );
     }
   }, [isVisible, isMobile]);
@@ -235,7 +261,6 @@ export function AppWindow({
     }
   };
 
-  const [snapType, setSnapType] = useState<SnapType | null>(null);
 
   const [snapPreview, setSnapPreview] = useState<SnapType | "maximize" | null>(null);
 
@@ -519,6 +544,7 @@ export function AppWindow({
                 onContextMenu={(e) => e.stopPropagation()}
                 role="region"
                 aria-label={title}
+                  tabIndex={-1}
                   data-width={contentWidth}
                 >
                   <ScrollContainerProvider container={contentRef}>
@@ -632,6 +658,7 @@ export function AppWindow({
                 onContextMenu={(e) => e.stopPropagation()}
                 role="region"
                 aria-label={title}
+                tabIndex={-1}
                 data-width={contentWidth}
               >
                 <ScrollContainerProvider container={contentRef}>

@@ -15,6 +15,12 @@ export type WallpaperChoice = {
   current: Wallpaper | undefined
   select: (id: string) => void
   next: () => void
+  rotation?: {
+    enabled: boolean
+    intervalSeconds: number
+    setEnabled: (enabled: boolean) => void
+    setIntervalSeconds: (seconds: number) => void
+  }
   /** The lock screen wallpaper set for the same device. */
   lock?: WallpaperChoice
 }

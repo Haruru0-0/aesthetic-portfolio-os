@@ -45,6 +45,23 @@ export default function MusicPlayerWidget({
 
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [dockBottom, setDockBottom] = useState(140);
+
+  useEffect(() => {
+    if (!isDesktop || !isExpanded) return;
+    const measure = () => {
+      const tops = [...document.querySelectorAll<HTMLElement>("[data-taskbar]")]
+        .map(dock => dock.getBoundingClientRect())
+        .filter(box => box.width > 0 && box.height > 0)
+        .map(box => box.top);
+      setDockBottom(Math.max(24, window.innerHeight - Math.min(window.innerHeight, ...tops) + 16));
+    };
+    const observer = new ResizeObserver(measure);
+    document.querySelectorAll("[data-taskbar]").forEach(dock => observer.observe(dock));
+    window.addEventListener("resize", measure);
+    measure();
+    return () => { observer.disconnect(); window.removeEventListener("resize", measure); };
+  }, [isDesktop, isExpanded]);
 
   const playerRef = useRef<HTMLDivElement>(null);
   const playlistRef = useRef<HTMLDivElement>(null);
@@ -451,10 +468,15 @@ export default function MusicPlayerWidget({
     return (
       <div
         ref={playerRef}
-        className="fixed bottom-6 right-6 z-50 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden bg-cover bg-center"
+        role="region"
+        aria-label="Music player"
+        className="fixed right-6 z-[70] backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-x-hidden overflow-y-auto bg-cover bg-center"
         style={{
+          bottom: dockBottom,
           width: showPlaylist ? "480px" : "380px",
           height: "300px",
+          maxWidth: "calc(100vw - 3rem)",
+          maxHeight: `calc(100dvh - ${dockBottom + 64}px)`,
           backgroundImage: `url(${MusicWallpaper})`,
         }}
       >

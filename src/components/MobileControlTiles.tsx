@@ -1,14 +1,14 @@
 "use client"
 
-import { Search } from "lucide-react"
+import { PanelsTopLeft } from "lucide-react"
 import { SoundSettings } from "./sound-settings"
 import { ModeToggle } from "./mode-toggle"
 import { WallpaperPicker } from "./WallpaperPicker"
 import { IconTile } from "./IconTile"
 import { GlassPanel } from "./GlassPanel"
 
-// 2x2 control tiles for the mobile home screen: Sound, Theme, Wallpaper and Search (command palette).
-export function MobileControlTiles({ onOpenPalette }: { onOpenPalette: () => void }) {
+// 2x2 controls; the app switcher also links to search.
+export function MobileControlTiles({ onOpenSwitcher }: { onOpenSwitcher: () => void }) {
   return (
     <div className="flex h-full items-center justify-center">
       <GlassPanel radius="1rem" className="dock-glass" contentClassName="p-1 transition-[padding] duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)] hover:p-2 active:p-2 motion-reduce:transition-none">
@@ -16,7 +16,7 @@ export function MobileControlTiles({ onOpenPalette }: { onOpenPalette: () => voi
           <SoundSettings variant="tile" />
           <ModeToggle variant="tile" />
           <WallpaperPicker />
-          <IconTile icon={<Search aria-hidden="true" />} label="Search" onClick={onOpenPalette} />
+          <IconTile icon={<PanelsTopLeft aria-hidden="true" />} label="Apps" onClick={onOpenSwitcher} />
         </div>
       </GlassPanel>
     </div>
