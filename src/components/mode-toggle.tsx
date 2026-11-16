@@ -49,7 +49,7 @@ export function ModeToggle({ variant = "icon" }: { variant?: "icon" | "tile" } =
       label="Theme"
     />
   ) : (
-    <button className="relative cursor-pointer flex items-center justify-center w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-slate-200 transition-colors">
+    <button className="glass-icon-control relative cursor-pointer flex items-center justify-center w-8 h-8 text-slate-200">
       <Sun className={`h-4 w-4 transition-all ${theme === "light" ? "rotate-0 scale-100" : "rotate-90 scale-0"}`} />
       <Moon className={`absolute h-4 w-4 transition-all ${theme === "dark" ? "rotate-0 scale-100" : "rotate-90 scale-0"}`} />
       <Monitor className={`absolute h-4 w-4 transition-all ${theme === "system" ? "rotate-0 scale-100" : "rotate-90 scale-0"}`} />

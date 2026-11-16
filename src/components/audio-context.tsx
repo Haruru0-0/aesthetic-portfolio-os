@@ -25,24 +25,25 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize audio element only once
   useEffect(() => {
-    if (typeof document !== 'undefined' && !audioRef.current) {
-      const audio = document.createElement('audio');
-      audioRef.current = audio;
-      document.body.appendChild(audio);
-
-      // Save current time when switching views
-      const currentTime = audio.currentTime;
+    if (typeof document !== 'undefined') {
+      const audio = audioRef.current ?? document.createElement('audio');
+      if (!audioRef.current) {
+        audioRef.current = audio;
+        document.body.appendChild(audio);
+      }
       
       const updateProgress = () => {
-        if (!audio.duration) return;
+        if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
         const newProgress = (audio.currentTime / audio.duration) * 100;
         setProgress(isNaN(newProgress) ? 0 : newProgress);
       };
 
       const handleEnded = () => {
-        const currentIndex = playlist.findIndex(t => t.id === currentTrack.id);
-        const nextIndex = (currentIndex + 1) % playlist.length;
-        setCurrentTrack(playlist[nextIndex]);
+        setCurrentTrack(track => {
+          const index = playlist.findIndex(item => item.id === track.id);
+          return playlist[(index + 1) % playlist.length];
+        });
+        setProgress(0);
       };
 
       audio.addEventListener('timeupdate', updateProgress);

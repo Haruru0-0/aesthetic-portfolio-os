@@ -175,6 +175,7 @@ code {
 }
 
 .window-drag-handle {
+  flex-shrink: 0;
   background: var(--cute-header);
   border-bottom: 2px solid var(--cute-text);
   padding: 8px 12px;
@@ -192,7 +193,10 @@ code {
 
 .window-content {
   padding: 20px;
-  height: calc(100% - 49px);
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  height: auto;
   overflow: auto;
   background: var(--bg-window);
   color: var(--cute-text);
@@ -298,7 +302,7 @@ code {
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
-  height: 100vh !important;
+  height: var(--app-viewport-height, 100dvh) !important;
   z-index: 9999 !important;
   transition: none !important;
   border: none !important;
@@ -307,15 +311,19 @@ code {
 }
 
 .maximized-window .window-content {
-  height: calc(100vh - 49px) !important;
-  max-height: calc(100vh - 49px) !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.maximized-window.mobile-app-window .window-content {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  scroll-padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 /* Mobile responsive styles */
 @media (max-width: 650px) {
   .window-content {
     padding: 1rem;
-    height: calc(100vh - 36px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -364,6 +372,14 @@ code {
   overflow: visible;
   box-shadow: none;
   z-index: 20;
+}
+
+.desktop-icon { outline: none; }
+
+.liquidGlass-icon.desktop-icon:focus-visible {
+  outline: none;
+  background: rgba(186, 230, 253, 0.12);
+  box-shadow: inset 0 0 0 2px #7dd3fc;
 }
 
 /* Taskbar styles */
@@ -743,20 +759,48 @@ code {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
-.dock-more {
-  border-radius: 1rem;
+.dock-icon {
+  border-radius: 0.75rem;
   outline: none;
 }
 
-.dock-more[aria-expanded="true"] {
+.dock-icon:focus-visible {
   background: rgba(186, 230, 253, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(186, 230, 253, 0.3);
+  box-shadow: inset 0 0 0 2px #7dd3fc;
 }
 
-.dock-more:focus-visible {
-  outline: 2px solid #bae6fd;
-  outline-offset: 3px;
+[data-music-widget] button {
+  border-radius: 0.75rem;
+  outline: none;
+}
+
+[data-music-widget] [role="slider"] { outline: none; }
+
+[data-music-widget] :is(button, [role="slider"]):focus-visible {
+  outline: none;
   background: rgba(186, 230, 253, 0.12);
+  box-shadow: inset 0 0 0 2px #7dd3fc;
+}
+
+.glass-icon-control {
+  border-radius: 0.75rem;
+  outline: none;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.glass-icon-control[aria-expanded="true"] {
+  background: rgba(186, 230, 253, 0.12);
+  box-shadow: none;
+}
+
+.glass-icon-control:hover,
+.glass-icon-control:focus-visible {
+  background: rgba(186, 230, 253, 0.12);
+  box-shadow: none;
+}
+
+.glass-icon-control:focus-visible {
+  box-shadow: inset 0 0 0 2px #7dd3fc;
 }
 
 .dock-icon:hover {

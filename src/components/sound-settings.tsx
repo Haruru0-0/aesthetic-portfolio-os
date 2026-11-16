@@ -114,7 +114,7 @@ export function SoundSettings({ variant = "icon" }: { variant?: "icon" | "tile" 
     <Button
       variant="ghost"
       size="icon"
-      className="relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-slate-200 transition-colors"
+      className="glass-icon-control relative flex items-center justify-center w-8 h-8 text-slate-200"
     >
       {isSoundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
       <span className="sr-only">Retro sound settings</span>

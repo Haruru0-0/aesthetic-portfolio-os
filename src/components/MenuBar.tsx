@@ -34,13 +34,13 @@ export default function MenuBar({ onOpenPalette, onOpenSwitcher }: { onOpenPalet
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {onOpenSwitcher && <button type="button" onClick={onOpenSwitcher} aria-label="Switch apps (Alt + backtick)" className="cursor-pointer rounded-full p-2 text-slate-200 outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-200"><PanelsTopLeft className="size-4" aria-hidden="true" /></button>}
+            {onOpenSwitcher && <button type="button" onClick={onOpenSwitcher} aria-label="Switch apps (Alt + backtick)" className="glass-icon-control cursor-pointer p-2 text-slate-200"><PanelsTopLeft className="size-4" aria-hidden="true" /></button>}
             {onOpenPalette && (
               <button
                 type="button"
                 onClick={onOpenPalette}
                 aria-label="Open command palette (Ctrl+K)"
-                className="flex cursor-pointer items-center gap-2 rounded-full px-3 py-1 text-sm text-slate-200 transition-colors hover:bg-white/10"
+                className="glass-icon-control flex h-8 cursor-pointer items-center gap-2 px-3 py-1 text-sm text-slate-200"
               >
                 <Search className="size-4" aria-hidden="true" />
                 <kbd className="hidden text-xs opacity-80 lg:inline">Ctrl K</kbd>

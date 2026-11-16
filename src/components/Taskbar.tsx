@@ -143,7 +143,7 @@ export function Taskbar({ apps, overflowApps, openWindows, onAppClick, className
                       <DropdownMenuTrigger asChild>
                         <DockButton
                           aria-label="More apps"
-                          className="dock-icon dock-more group relative"
+                          className="dock-icon dock-more glass-icon-control group relative"
                           onClick={() => playMenuSound()}
                           onMouseEnter={() => playHoverSound()}
                         >

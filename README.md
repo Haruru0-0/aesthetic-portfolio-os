@@ -19,7 +19,7 @@ drag and resize, a dock, a command palette, wallpapers you can switch, and liqui
 - **Right-click menu:** on the desktop, to open apps, sort icons, toggle sound, change theme and switch wallpapers.
 - **Wallpapers:** separate sets for desktop and mobile, home and lock screens. Drop an image into the right folder and
   it appears in the switchers (see [Customizing](#customizing)).
-- **Mobile layout:** a home screen with a folder of apps, widgets, and a 2x2 control grid (Sound, Theme, Wallpaper, Search).
+- **Mobile layout:** a home screen with a folder of apps, widgets, and a 2x2 control grid (Sound, Theme, Wallpaper, Apps).
 - **Liquid glass:** blue-tinted glass with real edge refraction in Chromium (SVG) and Firefox/Safari (WebGL).
 - **Light and dark themes**, reduced-motion support, and a keyboard-friendly UI.
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { motion, useReducedMotion } from "motion/react"
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "./ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "./ui/dialog"
+import { X } from "lucide-react"
 import { GlassPanel } from "./GlassPanel"
 
 type SwitcherApp = { name: string; icon: string; minimized: boolean }
@@ -35,7 +36,7 @@ export function AppSwitcher({ open, onOpenChange, apps, activeName, onSelect, on
         event.preventDefault()
         const direction = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1
         setSelected(value => (value + direction + apps.length) % apps.length)
-      } else if (open && event.key === "Enter") {
+      } else if (open && event.key === "Enter" && event.target === dialogRef.current) {
         event.preventDefault(); choose(selected)
       }
     }
@@ -49,9 +50,10 @@ export function AppSwitcher({ open, onOpenChange, apps, activeName, onSelect, on
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); window.removeEventListener("blur", blur) }
   }, [open, selected, apps, activeName, onSelect, onOpenChange])
   return <Dialog open={open} onOpenChange={value => { if (!value) keyboardSession.current = false; onOpenChange(value) }}>
-    <DialogContent ref={dialogRef} onOpenAutoFocus={event => { event.preventDefault(); dialogRef.current?.focus() }} className="max-w-[calc(100%-2rem)] rounded-[1.25rem] border-0 bg-transparent p-0 text-slate-100 shadow-none sm:max-w-xl" onCloseAutoFocus={event => event.preventDefault()}>
-      <GlassPanel radius="1.25rem" tintColor="rgba(12,55,115,0.62)" contentClassName="p-5 text-slate-100 [text-shadow:0_1px_3px_rgba(0,15,50,0.9)]">
-        <DialogTitle className="pr-8 text-xl font-bold text-white">Switch apps</DialogTitle>
+    <DialogContent ref={dialogRef} showCloseButton={false} onOpenAutoFocus={event => { event.preventDefault(); dialogRef.current?.focus() }} className="max-w-[calc(100%-2rem)] rounded-[1.25rem] border-0 bg-transparent p-0 text-slate-100 shadow-none sm:max-w-xl" onCloseAutoFocus={event => event.preventDefault()}>
+      <GlassPanel radius="1.25rem" tintColor="rgba(12,55,115,0.62)" contentClassName="relative p-5 text-slate-100 [text-shadow:0_1px_3px_rgba(0,15,50,0.9)]">
+        <DialogClose asChild><button type="button" aria-label="Close app switcher" className="glass-icon-control absolute right-2 top-2 z-10 flex size-11 cursor-pointer items-center justify-center text-slate-100"><X className="size-4" aria-hidden="true" /></button></DialogClose>
+        <DialogTitle className="pr-10 text-xl font-bold text-white">Switch apps</DialogTitle>
         <DialogDescription className="mt-1 text-xs text-slate-200">Choose an open app.<span className="hidden sm:inline"> Use Alt + ` to cycle, then release Alt to switch.</span></DialogDescription>
         {apps.length ? <div className="mt-5 grid max-h-[60dvh] grid-cols-2 gap-3 overflow-y-auto p-1 sm:grid-cols-4" role="group" aria-label="Open apps">
           {apps.map((app, index) => <button key={app.name} type="button" aria-label={`Switch to ${app.name}`} aria-pressed={selected === index} onFocus={() => setSelected(index)} onClick={() => choose(index)} className="relative isolate flex cursor-pointer flex-col items-center gap-2 rounded-xl p-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-sky-200">

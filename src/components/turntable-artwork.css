@@ -1,0 +1,11 @@
+.turntable-artwork{position:relative;display:block;width:100%;aspect-ratio:1;isolation:isolate;pointer-events:none}
+.turntable-artwork__body{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.turntable-artwork__label{position:absolute;left:48.6%;top:50.5%;width:32%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;box-shadow:0 0 0 1px #d9f2ff80}
+.turntable-artwork__label>img{display:block;width:100%;height:100%;object-fit:cover;animation:turntable-cover-spin 6s linear infinite;animation-play-state:paused}
+.turntable-artwork[data-playing=true] .turntable-artwork__label>img{animation-play-state:running}
+.turntable-artwork__spindle{position:absolute;left:50%;top:50%;width:7%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff,#b4d3e7 55%,#6c95b2);box-shadow:0 1px 2px #244d7150}
+.turntable-artwork__arm{position:absolute;inset:0;width:100%;height:100%;overflow:visible;filter:drop-shadow(1px 1px 1px #31567440)}
+.turntable-artwork__moving-arm{transform-origin:820px 200px;transform:rotate(0deg);transition:transform 750ms cubic-bezier(.4,0,.2,1)}
+.turntable-artwork[data-playing=true] .turntable-artwork__moving-arm{transform:rotate(25deg)}
+@keyframes turntable-cover-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.turntable-artwork__moving-arm{transition:none}.turntable-artwork__label>img{animation:none}}

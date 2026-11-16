@@ -194,6 +194,20 @@ export function AppWindow({
     }
   }, [isMaximized, isMobile]);
   const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isMobile) return;
+    const element = windowRef.current;
+    const viewport = window.visualViewport;
+    const update = () => element?.style.setProperty("--app-viewport-height", `${viewport?.height ?? window.innerHeight}px`);
+    update();
+    viewport?.addEventListener("resize", update);
+    window.addEventListener("resize", update);
+    return () => {
+      viewport?.removeEventListener("resize", update);
+      window.removeEventListener("resize", update);
+      element?.style.removeProperty("--app-viewport-height");
+    };
+  }, [isMobile, isMinimized, isMaximized]);
   const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
   // Callback ref keeps contentRef.current (used by ScrollContainerProvider) and
   // contentEl state (used by useResizeObserver) in sync across branch switches.
@@ -461,7 +475,7 @@ export function AppWindow({
           {isMaximized || snapType ? (
             <div
               ref={windowRef}
-              className={`absolute ${isMaximized ? "maximized-window" : "snapped-window"}`}
+              className={`absolute ${isMaximized ? "maximized-window" : "snapped-window"} ${isMobile ? "mobile-app-window" : ""}`}
               onMouseDownCapture={bringToFront}
               style={isMaximized ? {
                 zIndex: zIndex,
@@ -592,7 +606,7 @@ export function AppWindow({
                 width: size.width,
                 height: size.height,
               }}
-              style={{ zIndex: zIndex }}
+              style={{ zIndex: zIndex, display: "flex", flexDirection: "column" }}
               className="window-container"
             >
               <div className="window-drag-handle relative z-50"
