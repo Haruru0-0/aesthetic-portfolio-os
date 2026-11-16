@@ -27,6 +27,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const audio = audioRef.current ?? document.createElement('audio');
+      audio.preload = 'auto';
       if (!audioRef.current) {
         audioRef.current = audio;
         document.body.appendChild(audio);

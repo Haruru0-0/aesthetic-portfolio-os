@@ -75,7 +75,11 @@ export default function MusicPlayer({ isDesktop = false }: { isDesktop?: boolean
     if (!audioRef.current) return;
     try {
       if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); playClickSound(); }
-      else { await audioRef.current.play(); setIsPlaying(true); playPowerUpSound(); unlock("music_head"); }
+      else {
+        // Flip the icon right away; play() only resolves once enough of the track has downloaded.
+        setIsPlaying(true); playPowerUpSound(); unlock("music_head");
+        await audioRef.current.play();
+      }
     } catch (error) { console.error("Playback error:", error); setIsPlaying(false); }
   };
   const seek = (value: number[]) => {
